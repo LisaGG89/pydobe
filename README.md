@@ -11,14 +11,6 @@ A Python wrapper allowing developers to communicate with adobe applications
 This package is based upon Pymiere - created by Quentin Masingarbe (https://github.com/qmasingarbe/pymiere)
 
 
-# Installation
-
-Windows: 
-
-``
-pip install pydobe
-``
-
 # Thanks
 
 Thank you to Quentin Masingarbe for his repository Pymiere, as well as sharing his knowledge with me
