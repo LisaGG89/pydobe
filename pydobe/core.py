@@ -1,8 +1,10 @@
 import json
 import requests
+import socket
 
-PANEL_URL = "http://127.0.0.1:2000"
-
+HOST = "127.0.0.1"
+PORT = 2000
+PANEL_URL = f"http://{HOST}:{PORT}"
 
 class PydobeBaseObject(object):
     """Base object for every mirror object from ExtendScript"""
@@ -20,7 +22,7 @@ class PydobeBaseObject(object):
         else:
             index = ""
         line = f"$._pydobe['{self.pydobe_id}']{index}{extend_property};"
-        result = _eval_script_returning_object(line)
+        result = eval_script_returning_object(line)
         return result
 
 
@@ -46,8 +48,15 @@ class PydobeBaseCollection(PydobeBaseObject):
 
         return int(self._eval_on_this_object(self.len_property))
 
+def is_port_open():
+    a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    location = (HOST, PORT)
+    result_of_check = a_socket.connect_ex(location)
+    message = f"Connection to port {PORT} could not be established. Please ensure After Effects is running."
+    if result_of_check != 0:
+        raise ConnectionError(message)
 
-def _eval_script_returning_object(line: str):
+def eval_script_returning_object(line: str):
     """Eval the line as ExtendScript code.
     If the code returns an object, it will be stored with an id for pydobe to handle """
 
@@ -86,7 +95,7 @@ def eval_script(code: str):
     return decoded_data
 
 
-def _format_to_extend(obj):
+def format_to_extend(obj):
     """Format the argument to ExtendScript"""
 
     if isinstance(obj, PydobeBaseObject):

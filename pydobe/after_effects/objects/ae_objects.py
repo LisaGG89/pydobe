@@ -1,4 +1,4 @@
-from pydobe.core import PydobeBaseObject, PydobeBaseCollection, _format_to_extend, _eval_script_returning_object
+from pydobe.core import PydobeBaseObject, PydobeBaseCollection, format_to_extend, eval_script_returning_object
 
 
 # OBJECTS
