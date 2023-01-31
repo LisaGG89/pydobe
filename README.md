@@ -13,11 +13,11 @@ This package is based upon Pymiere - created by Quentin Masingarbe (https://gith
 
 # Thanks
 
-Thank you to Quentin Masingarbe for his repository Pymiere, as well as sharing his knowledge with me
+Thank you to Quentin Masingarbe for his Pymiere repository, as well as sharing his knowledge with me
 
 # License
 
-This project is licensed under the MIT License. See the LICENSE.md file for details. Copy it, steal it, modify it, share it!
+This project is licensed under the MIT License. See the LICENSE file for details. Copy it, steal it, modify it, share it!
 # Contact
 
 For support, questions, or interest, please contact me at lisa.gg89@gmail.com
