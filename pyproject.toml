@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=67.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pydobe"
+version = "0.0.1"
+description = "Python wrapper allowing developers to communicate with adobe applications"
+readme = "README.md"
+authors = [{ name = "Lisa George-Gilroy", email = "Lisa.gg89@gmail.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    'Operating System :: Microsoft :: Windows',
+]
+keywords = ["python", "adobe", "wrapper"]
+dependencies = ["requests>=2.28.2"]
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+dev = ["black", "PySide2"]
+
+[project.urls]
+Homepage = "https://github.com/LisaGG89/pydobe"
