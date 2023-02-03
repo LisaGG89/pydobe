@@ -10,10 +10,10 @@ A Python wrapper allowing developers to communicate with adobe applications
 
 This package is based upon Pymiere - created by Quentin Masingarbe (https://github.com/qmasingarbe/pymiere)
 
-
 # Thanks
 
-Thank you to Quentin Masingarbe for his Pymiere repository, as well as sharing his knowledge with me
+Thank you to Quentin Masingarbe for his Pymiere repository, as well as sharing his knowledge with me.
+Thank you to Corentin Charron for constant mentoring.
 
 # License
 
