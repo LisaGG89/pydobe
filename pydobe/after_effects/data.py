@@ -1,3 +1,5 @@
+from pydobe.utils import IntStringDict
+
 label_dictionary = IntStringDict({
     0: 'None',
     1: 'Red',
