@@ -46,6 +46,22 @@ class Project(PydobeBaseObject):
 
     # PROPERTIES
 
+    """The item that is currently active and is to be acted upon, 
+    or a null if no item is currently selected or if multiple items are selected."""
+
+    @property
+    def active_item(self) -> object:
+        item = None
+        kwargs = self._eval_on_this_object('activeItem')
+        type_name = self._eval_on_this_object('activeItem.typeName')
+        if type_name == "Composition":
+            item = CompositionItem(**kwargs)
+        elif type_name == "Footage":
+            item = FootageItem(**kwargs)
+        elif type_name == "Folder":
+            item = FolderItem(**kwargs)
+        return item
+
     """Returns True if file has been modified since last save. False if it has not"""
 
     @property
@@ -58,6 +74,27 @@ class Project(PydobeBaseObject):
     def file(self) -> object:
         kwargs = self._eval_on_this_object('file')
         return File(**kwargs) if kwargs else None
+
+    """All of the items in the project"""
+
+    @property
+    def items(self):
+        kwargs = self._eval_on_this_object('items')
+        return ItemCollection(**kwargs) if kwargs else None
+
+    """The number of items within the project"""
+
+    @property
+    def num_items(self):
+        return self._eval_on_this_object('numItems')
+
+    """The root folder containing the contents of the project
+    Items inside internal folders will not be shown"""
+
+    @property
+    def root_folder(self):
+        kwargs = self._eval_on_this_object('rootFolder')
+        return FolderItem(**kwargs) if kwargs else None
 
     # FUNCTIONS
 
