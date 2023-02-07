@@ -18,6 +18,17 @@ class Application(PydobeBaseObject):
 
     # FUNCTIONS
 
+    def new_project(self, save=None):
+        """ Create a new empty project."""
+        if save is None:
+            pass
+        elif save:
+            self.project.close(save=True)
+        else:
+            self.project.close(save=False)
+        kwargs = self._eval_on_this_object('newProject()')
+        return Project(**kwargs) if kwargs else None
+
     def open(self, path=None):
         """A new Project object for the specified project, or null if the user cancels the Open dialog box."""
         if path:
