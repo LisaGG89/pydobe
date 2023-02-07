@@ -1,5 +1,6 @@
 from pydobe.core import PydobeBaseObject, PydobeBaseCollection, format_to_extend, eval_script_returning_object
 from pydobe.after_effects.data import *
+from pydobe.after_effects.ae_utils import *
 
 
 # BASE OBJECTS
@@ -152,7 +153,7 @@ class Item(PydobeBaseObject):
 
     @label.setter
     def label(self, value: int or str):
-        if type(value).__name__ == 'int':
+        if type(value) == int:
             int_value = value
         else:
             int_value = label_dictionary[value]
@@ -198,14 +199,14 @@ class Item(PydobeBaseObject):
 
     @property
     def type_name(self) -> str:
-        return self.eval_on_this_object('typeName')
+        return self._eval_on_this_object('typeName')
 
     # FUNCTIONS
 
     def remove(self):
         """Deletes this item from the project and the Project panel.
         If the item is a FolderItem, all the items contained in the folder are also removed from the project"""
-        return self.eval_on_this_object("remove()")
+        return self._eval_on_this_object("remove()")
 
 
 
@@ -247,6 +248,22 @@ class ItemCollection(PydobeBaseCollection):
         elif type_name == "Folder":
             item = FolderItem(**kwargs)
         return item
+
+    # FUNCTIONS
+
+    def add_comp(self, name: str, width: int, height: int, aspect_ratio: float, duration: float,
+                 frame_rate: float, duration_as_frames=True) -> object:
+        """Add a new Composition to the project"""
+        if duration_as_frames:
+            duration = current_format_to_time(duration, frame_rate)
+        kwargs = self._eval_on_this_object(
+            f'addComp("{name}", {width}, {height}, {aspect_ratio}, {duration}, {frame_rate})')
+        return CompositionItem(**kwargs)
+
+    def add_folder(self, name: str) -> object:
+        """Add a new Folder to the project"""
+        kwargs = self._eval_on_this_object(f'addFolder("{name}")')
+        return FolderItem(**kwargs)
 
 
 # ADOBE GENERAL OBJECTS
