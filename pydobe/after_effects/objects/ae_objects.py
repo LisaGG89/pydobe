@@ -78,6 +78,7 @@ class Project(PydobeBaseObject):
         else:
             return self._eval_on_this_object('save()')
 
+
 # ITEMS
 
 class Item(PydobeBaseObject):
@@ -87,21 +88,33 @@ class Item(PydobeBaseObject):
     def __str__(self):
         return self.name
 
+
 class AVItem(Item):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id)
+
 
 class CompositionItem(AVItem):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id)
 
+
 class FolderItem(Item):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id)
 
+
 class FootageItem(AVItem):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id)
+
+
+# COLLECTIONS
+
+class ItemCollection(PydobeBaseCollection):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id, "length")
+
 
 # ADOBE GENERAL OBJECTS
 
