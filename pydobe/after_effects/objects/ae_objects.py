@@ -46,6 +46,12 @@ class Project(PydobeBaseObject):
 
     # PROPERTIES
 
+    """Returns True if file has been modified since last save. False if it has not"""
+
+    @property
+    def dirty(self) -> bool:
+        return self._eval_on_this_object('dirty')
+
     """Identifies the file object containing the project"""
 
     @property

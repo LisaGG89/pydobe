@@ -42,6 +42,11 @@ app.project.save()
 new_path = "path/to/my/new/project.aep"
 app.project.save(new_path)
 
+# Make some changes to your project
+
+# Check if scene has been modified
+print(app.project.dirty)
+
 # # Close a Project
 app.project.close()  # This will display a user prompt
 # app.project.close(save=True)  # This will save before opening a new project

@@ -10,13 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Following functions added:
+- Following functionality added:
   - Open project
   - Save project
   - Close project
   - New project
 
 - Following data retrievable
+  - Has scene been modified
   - Current scene name
   - Current scene file path
 
