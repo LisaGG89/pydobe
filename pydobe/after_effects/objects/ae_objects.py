@@ -1,7 +1,7 @@
 from pydobe.core import PydobeBaseObject, PydobeBaseCollection, format_to_extend, eval_script_returning_object
 
 
-# OBJECTS
+# BASE OBJECTS
 
 class Application(PydobeBaseObject):
     def __init__(self, pydobe_id=None):
@@ -37,7 +37,6 @@ class Application(PydobeBaseObject):
             return self._eval_on_this_object(f'open({extend_file_object})')
         else:
             return self._eval_on_this_object(f'open()')
-
 
 
 class Project(PydobeBaseObject):
@@ -79,6 +78,30 @@ class Project(PydobeBaseObject):
         else:
             return self._eval_on_this_object('save()')
 
+# ITEMS
+
+class Item(PydobeBaseObject):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+    def __str__(self):
+        return self.name
+
+class AVItem(Item):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+class CompositionItem(AVItem):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+class FolderItem(Item):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+class FootageItem(AVItem):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
 
 # ADOBE GENERAL OBJECTS
 
