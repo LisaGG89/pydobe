@@ -44,8 +44,6 @@ class Project(PydobeBaseObject):
 
 # ADOBE GENERAL OBJECTS
 
-# ADOBE
-
 class File(PydobeBaseObject):
     def __init__(self, path=None, pydobe_id=None):
         super().__init__(pydobe_id)
