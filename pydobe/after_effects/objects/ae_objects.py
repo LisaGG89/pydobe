@@ -1,4 +1,5 @@
 from pydobe.core import PydobeBaseObject, PydobeBaseCollection, format_to_extend, eval_script_returning_object
+from pydobe.after_effects.data import *
 
 
 # BASE OBJECTS
@@ -87,6 +88,88 @@ class Item(PydobeBaseObject):
 
     def __str__(self):
         return self.name
+
+    # PROPERTIES
+
+    """A string that holds a comment, the comment is for the user’s purpose only"""
+
+    @property
+    def comment(self) -> str:
+        return self._eval_on_this_object('comment')
+
+    @comment.setter
+    def comment(self, value: str):
+        self._eval_on_this_object(f'comment = "{value}"')
+
+    """A unique and persistent identification number used internally to identify an item between sessions"""
+
+    @property
+    def id(self) -> int:
+        return self._eval_on_this_object('id')
+
+    """The colour of the label assigned to the item, expressed as an integer between 1-16. 0 = none"""
+
+    @property
+    def label(self) -> int:
+        return self._eval_on_this_object('label')
+
+    @label.setter
+    def label(self, value: int or str):
+        if type(value).__name__ == 'int':
+            int_value = value
+        else:
+            int_value = label_dictionary[value]
+        self._eval_on_this_object(f"label = {int_value};")
+
+    """The name of the item as displayed in the Project panel"""
+
+    @property
+    def name(self) -> str:
+        return self._eval_on_this_object('name')
+
+    @name.setter
+    def name(self, value: str):
+        self._eval_on_this_object(f'name = "{value}"')
+
+    """The folder object that the item is parented to"""
+
+    @property
+    def parent_folder(self) -> object:
+        kwargs = self._eval_on_this_object('parentFolder')
+        return FolderItem(**kwargs) if kwargs else None
+
+    @parent_folder.setter
+    def parent_folder(self, value: object):
+        if value.type_name == "Folder":
+            extend_value = format_to_extend(value)
+            self._eval_on_this_object(f'parentFolder = {extend_value}')
+        else:
+            raise TypeError("Unable to set 'parent_folder', type must be 'Folder'")
+
+    """Whether the item is selected or not, multiple items can be selected at the same time"""
+
+    @property
+    def selected(self) -> bool:
+        return self._eval_on_this_object('selected')
+
+    @selected.setter
+    def selected(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f'selected = "{extend_value}"')
+
+    """User readable name for Item type"""
+
+    @property
+    def type_name(self) -> str:
+        return self.eval_on_this_object('typeName')
+
+    # FUNCTIONS
+
+    def remove(self):
+        """Deletes this item from the project and the Project panel.
+        If the item is a FolderItem, all the items contained in the folder are also removed from the project"""
+        return self.eval_on_this_object("remove()")
+
 
 
 class AVItem(Item):
