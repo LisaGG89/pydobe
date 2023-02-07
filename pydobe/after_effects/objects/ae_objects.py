@@ -97,6 +97,38 @@ class Project(PydobeBaseObject):
         kwargs = self._eval_on_this_object('rootFolder')
         return FolderItem(**kwargs) if kwargs else None
 
+    # CUSTOM PROPERTIES
+
+    """All of the composition items within the project"""
+
+    @property
+    def compositions(self):
+        composition_items = []
+        for item in self.items:
+            if item.type_name == "Composition":
+                composition_items.append(item)
+        return composition_items
+
+    """All of the footage items within the project"""
+
+    @property
+    def footages(self):
+        footage_items = []
+        for item in self.items:
+            if item.type_name == "Footage":
+                footage_items.append(item)
+        return footage_items
+
+    """All of the folder items within the project"""
+
+    @property
+    def folders(self):
+        folder_items = []
+        for item in self.items:
+            if item.type_name == "Folder":
+                folder_items.append(item)
+        return folder_items
+
     # FUNCTIONS
 
     def close(self, save=None):
