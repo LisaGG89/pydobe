@@ -149,6 +149,15 @@ class Project(PydobeBaseObject):
         else:
             return self._eval_on_this_object('save()')
 
+    # CUSTOM FUNCTIONS
+
+    def item_by_name(self, name):
+        """Get an item by its name from within this project"""
+        for item in self.items:
+            if item.name == name:
+                return item
+        raise LookupError("There is no item by this name in your project")
+
 
 # ITEMS
 
