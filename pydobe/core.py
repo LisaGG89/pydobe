@@ -36,17 +36,22 @@ class PydobeBaseCollection(PydobeBaseObject):
         super(PydobeBaseCollection, self).__init__(pydobe_id)
 
     def __getitem__(self, index: int) -> dict:
-        """Builtin method for getting the value at the specific index, redirect to ExtendScript similar query"""
+        """Builtin method for getting the value at the specific index"""
 
         if index < 0:
             index = str(self.__len__() + index)
-        # return self._eval_on_this_object(es_property="typeName", index=index)
         return self._eval_on_this_object(index=index)
 
     def __len__(self) -> int:
-        """Builtin method for length, we ask premiere using the 'num...' property of the object"""
+        """Builtin method for length"""
 
         return int(self._eval_on_this_object(self.len_property))
+
+    def __iter__(self):
+        """Builtin method for iterating through items"""
+
+        value = iter([self.__getitem__(i) for i in range(len(self))])
+        return value
 
 def is_port_open():
     a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
