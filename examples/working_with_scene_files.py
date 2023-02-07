@@ -19,12 +19,12 @@ app.project.save(new_path)
 
 # # Close a Project
 app.project.close()  # This will display a user prompt
-# ae.project.close(save=True)  # This will save before opening a new project
-# ae.project.close(save=False)  # This will not save before opening a new project
+# app.project.close(save=True)  # This will save before opening a new project
+# app.project.close(save=False)  # This will not save before opening a new project
 
 
 # Create a new Project
 app.new_project()  # This will display a user prompt
-# ae.new_project(save=True)  # This will save before opening a new project
-# ae.new_project(save=False)  # This will not save before opening a new project
+# app.new_project(save=True)  # This will save before opening a new project
+# app.new_project(save=False)  # This will not save before opening a new project
 
