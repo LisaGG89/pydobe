@@ -22,7 +22,7 @@ pip install pydobe
 
 Snippets and examples for potential uses within After Effects
 
-### Working with scene files
+### Working with projects
 
 ```
 app = pydobe.objects.app
