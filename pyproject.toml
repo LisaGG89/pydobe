@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pydobe"
-version = "0.0.1"
+version = "0.1.0"
 description = "Python wrapper allowing developers to communicate with adobe applications"
 readme = "README.md"
 authors = [{ name = "Lisa George-Gilroy", email = "Lisa.gg89@gmail.com" }]
