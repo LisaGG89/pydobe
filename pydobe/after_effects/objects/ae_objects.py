@@ -44,6 +44,15 @@ class Project(PydobeBaseObject):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id)
 
+    # PROPERTIES
+
+    """Identifies the file object containing the project"""
+
+    @property
+    def file(self) -> object:
+        kwargs = self._eval_on_this_object('file')
+        return File(**kwargs) if kwargs else None
+
     # FUNCTIONS
 
     def close(self, save=None):
