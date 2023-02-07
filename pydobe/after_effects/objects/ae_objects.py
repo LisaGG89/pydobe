@@ -235,6 +235,19 @@ class ItemCollection(PydobeBaseCollection):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id, "length")
 
+    def __getitem__(self, index):
+        item = None
+        index = index + 1
+        kwargs = super(ItemCollection, self).__getitem__(index)
+        type_name = self._eval_on_this_object(extend_property="typeName", index=index)
+        if type_name == "Composition":
+            item = CompositionItem(**kwargs)
+        if type_name == "Footage":
+            item = FootageItem(**kwargs)
+        elif type_name == "Folder":
+            item = FolderItem(**kwargs)
+        return item
+
 
 # ADOBE GENERAL OBJECTS
 
