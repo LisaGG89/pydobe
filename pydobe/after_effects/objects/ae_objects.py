@@ -16,6 +16,18 @@ class Application(PydobeBaseObject):
         kwargs = self._eval_on_this_object('project')
         return Project(**kwargs) if kwargs else None
 
+    # FUNCTIONS
+
+    def open(self, path=None):
+        """A new Project object for the specified project, or null if the user cancels the Open dialog box."""
+        if path:
+            file = File(path, **eval_script_returning_object(f'File("{path}")'))
+            extend_file_object = format_to_extend(file)
+            return self._eval_on_this_object(f'open({extend_file_object})')
+        else:
+            return self._eval_on_this_object(f'open()')
+
+
 
 class Project(PydobeBaseObject):
     def __init__(self, pydobe_id=None):
