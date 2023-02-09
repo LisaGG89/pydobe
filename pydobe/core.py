@@ -82,6 +82,9 @@ def eval_script_returning_object(line: str):
     if isinstance(result, dict) and result.get("isObject"):
         if result["objectType"].endswith("Source"):
             kwargs = dict(pydobe_id=result["pydobeId"], object_type=result["objectType"])
+        elif result["objectType"] == "Array" and "=" not in line:
+            data_list = convert_to_list(line)
+            return data_list
         else:
             kwargs = dict(pydobe_id=result["pydobeId"])
         return kwargs
@@ -119,3 +122,14 @@ def format_to_extend(obj):
         return "$._pydobe['{}']".format(obj.pydobe_id)
     elif isinstance(obj, bool):
         return str(obj).lower()
+
+
+def convert_to_list(line):
+    data_list = []
+    count_line = f"{line[:-1]}.length;"
+    count = eval_script_returning_object(count_line)
+    for index in range(count):
+        value_line = f"{line[:-1]}[{index}];"
+        value = eval_script_returning_object(value_line)
+        data_list.append(value)
+    return data_list
