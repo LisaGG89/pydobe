@@ -265,6 +265,52 @@ class FolderItem(Item):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id)
 
+    # PROPERTIES
+
+    """All of the items in the folder"""
+
+    @property
+    def items(self):
+        kwargs = self._eval_on_this_object('items')
+        return ItemCollection(**kwargs) if kwargs else None
+
+    """The number of items within the folder"""
+
+    @property
+    def num_items(self):
+        return self._eval_on_this_object('numItems')
+
+    # CUSTOM PROPERTIES
+
+    """The composition items found in the folder"""
+
+    @property
+    def compositions(self):
+        composition_items = []
+        for item in self.items:
+            if item.type_name == "Composition":
+                composition_items.append(item)
+        return composition_items
+
+    """The footage items found in the folder"""
+
+    @property
+    def footages(self):
+        footage_items = []
+        for item in self.items:
+            if item.type_name == "Footage":
+                footage_items.append(item)
+        return footage_items
+
+    """The folder items found in the folder"""
+
+    @property
+    def folders(self):
+        folder_items = []
+        for item in self.items:
+            if item.type_name == "Folder":
+                folder_items.append(item)
+        return folder_items
 
 class FootageItem(AVItem):
     def __init__(self, pydobe_id=None):
