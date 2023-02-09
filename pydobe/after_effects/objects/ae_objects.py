@@ -1,5 +1,6 @@
 from pydobe.core import PydobeBaseObject, PydobeBaseCollection, format_to_extend
 from pydobe.adobe_objects import File
+from pydobe.utils import format_colour
 from pydobe.after_effects.data import *
 from pydobe.after_effects.ae_utils import *
 
@@ -428,6 +429,78 @@ class FootageSource(PydobeBaseObject):
     def type_name(self):
         return self.object_type
 
+    """Defines how the alpha information in the footage is interpreted."""
+
+    @property
+    def alpha_mode(self) -> int:
+        return self._eval_on_this_object('alphaMode')
+
+    @alpha_mode.setter
+    def alpha_mode(self, value: str or int):
+        if type(value) == str:
+            value = alpha_dictionary[value]
+        self._eval_on_this_object(f'alphaMode = {value}')
+
+    """The effective frame rate as displayed and rendered in compositions by After Effects."""
+
+    @property
+    def conform_frame_rate(self) -> float:
+        return self._eval_on_this_object('conformFrameRate')
+
+    @conform_frame_rate.setter
+    def conform_frame_rate(self, value: float):
+        self._eval_on_this_object(f'conformFrameRate = "{value}"')
+
+    """When true, the footage has an alpha component."""
+
+    @property
+    def has_alpha(self) -> bool:
+        return self._eval_on_this_object('hasAlpha')
+
+    """When true, the footage has an alpha component."""
+
+    @property
+    def invert_alpha(self) -> bool:
+        return self._eval_on_this_object('invertAlpha')
+
+    @invert_alpha.setter
+    def invert_alpha(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f'invertAlpha = {extend_value}')
+
+    """When true the footage is still; when false, it has a time-based component."""
+
+    @property
+    def is_still(self) -> bool:
+        return self._eval_on_this_object('isStill')
+
+    """The number of times that the footage is to be played consecutively when used in a composition."""
+
+    @property
+    def loop(self) -> int:
+        return self._eval_on_this_object('loop')
+
+    @loop.setter
+    def loop(self, value: int):
+        self._eval_on_this_object(f'loop = {value}')
+
+    """The native frame rate of the footage."""
+
+    @property
+    def native_frame_rate(self) -> float:
+        return self._eval_on_this_object('nativeFrameRate')
+
+    """The color to be premultiplied."""
+
+    @property
+    def premul_colour(self) -> int:
+        return self._eval_on_this_object('premulColor')
+
+    @premul_colour.setter
+    def premul_colour(self, value: list or str):
+        colour = format_colour(value)
+        self._eval_on_this_object(f'premulColor = {colour}')
+
 
 class FileSource(FootageSource):
     def __init__(self, pydobe_id=None, object_type=None):
@@ -558,4 +631,3 @@ class Viewer(PydobeBaseObject):
     def set_active(self) -> bool:
         """Moves the viewer panel to the front and places focus on it, making it active."""
         return self._eval_on_this_object('setActive()')
-
