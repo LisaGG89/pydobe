@@ -344,6 +344,22 @@ class FootageItem(AVItem):
 
     # PROPERTIES
 
+    """The footage source, an object that contains all of the settings related to that footage item, 
+    including those that are normally accessed through the Interpret Footage dialog box"""
+
+    @property
+    def main_source(self) -> object:
+        item = None
+        kwargs = self._eval_on_this_object('mainSource')
+        object_type = kwargs["object_type"]
+        if object_type == "FileSource":
+            item = FileSource(**kwargs)
+        elif object_type == "SolidSource":
+            item = SolidSource(**kwargs)
+        elif object_type == "PlaceholderSource":
+            item = PlaceHolderSource(**kwargs)
+        return item
+
     """The file object associated with this footage"""
 
     @property
@@ -376,8 +392,36 @@ class FootageItem(AVItem):
         self._eval_on_this_object(f'replaceWithSolid({colour},"{name}", {width}, {height}, {pixel_aspect})')
 
 
-# COLLECTIONS
+# SOURCES
 
+class FootageSource(PydobeBaseObject):
+    def __init__(self, pydobe_id=None, object_type=None):
+        super().__init__(pydobe_id)
+        self.object_type = object_type
+
+    # PROPERTIES
+
+    @property
+    def type_name(self):
+        return self.object_type
+
+
+class FileSource(FootageSource):
+    def __init__(self, pydobe_id=None, object_type=None):
+        super().__init__(pydobe_id, object_type)
+
+
+class SolidSource(FootageSource):
+    def __init__(self, pydobe_id=None, object_type=None):
+        super().__init__(pydobe_id, object_type)
+
+
+class PlaceHolderSource(FootageSource):
+    def __init__(self, pydobe_id=None, object_type=None):
+        super().__init__(pydobe_id, object_type)
+
+
+# COLLECTIONS
 
 class ItemCollection(PydobeBaseCollection):
     def __init__(self, pydobe_id=None):

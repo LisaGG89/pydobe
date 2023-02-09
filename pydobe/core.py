@@ -80,7 +80,10 @@ def eval_script_returning_object(line: str):
     result = eval_script(script)
     # Extract pydobe ID if object is returned
     if isinstance(result, dict) and result.get("isObject"):
-        kwargs = dict(pydobe_id=result["pydobeId"])
+        if result["objectType"].endswith("Source"):
+            kwargs = dict(pydobe_id=result["pydobeId"], object_type=result["objectType"])
+        else:
+            kwargs = dict(pydobe_id=result["pydobeId"])
         return kwargs
     return result
 
