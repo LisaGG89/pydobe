@@ -366,6 +366,10 @@ class FootageItem(AVItem):
         force_alphabetical = format_to_extend(force_alphabetical)
         self._eval_on_this_object(f'replaceWithSequence({extend_file_object}, {force_alphabetical})')
 
+    def replace_with_solid(self, colour: list, name: str, width: int, height: int, pixel_aspect: float):
+        """Changes the source of this FootageItem to the specified solid"""
+        self._eval_on_this_object(f'replaceWithSolid({colour},"{name}", {width}, {height}, {pixel_aspect})')
+
 
 # COLLECTIONS
 
