@@ -6,6 +6,7 @@ from pydobe.after_effects.ae_utils import *
 
 # BASE OBJECTS
 
+
 class Application(PydobeBaseObject):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id)
@@ -16,20 +17,20 @@ class Application(PydobeBaseObject):
 
     @property
     def project(self) -> object:
-        kwargs = self._eval_on_this_object('project')
+        kwargs = self._eval_on_this_object("project")
         return Project(**kwargs) if kwargs else None
 
     # FUNCTIONS
 
     def new_project(self, save: bool = None) -> object:
-        """ Create a new empty project."""
+        """Create a new empty project."""
         if save is None:
             pass
         elif save:
             self.project.close(save=True)
         else:
             self.project.close(save=False)
-        kwargs = self._eval_on_this_object('newProject()')
+        kwargs = self._eval_on_this_object("newProject()")
         return Project(**kwargs) if kwargs else None
 
     def open(self, path: str = None, save: bool = None) -> object:
@@ -43,9 +44,9 @@ class Application(PydobeBaseObject):
         if path:
             file = File(**eval_script_returning_object(f'File("{path}")'))
             extend_file_object = format_to_extend(file)
-            kwargs = self._eval_on_this_object(f'open({extend_file_object})')
+            kwargs = self._eval_on_this_object(f"open({extend_file_object})")
         else:
-            kwargs = self._eval_on_this_object(f'open()')
+            kwargs = self._eval_on_this_object(f"open()")
         return Project(**kwargs) if kwargs else None
 
 
@@ -61,8 +62,8 @@ class Project(PydobeBaseObject):
     @property
     def active_item(self) -> object:
         item = None
-        kwargs = self._eval_on_this_object('activeItem')
-        type_name = self._eval_on_this_object('activeItem.typeName')
+        kwargs = self._eval_on_this_object("activeItem")
+        type_name = self._eval_on_this_object("activeItem.typeName")
         if type_name == "Composition":
             item = CompositionItem(**kwargs)
         elif type_name == "Footage":
@@ -75,34 +76,34 @@ class Project(PydobeBaseObject):
 
     @property
     def dirty(self) -> bool:
-        return self._eval_on_this_object('dirty')
+        return self._eval_on_this_object("dirty")
 
     """Identifies the file object containing the project"""
 
     @property
     def file(self) -> object:
-        kwargs = self._eval_on_this_object('file')
+        kwargs = self._eval_on_this_object("file")
         return File(**kwargs) if kwargs else None
 
     """All of the items in the project"""
 
     @property
     def items(self) -> object:
-        kwargs = self._eval_on_this_object('items')
+        kwargs = self._eval_on_this_object("items")
         return ItemCollection(**kwargs) if kwargs else None
 
     """The number of items within the project"""
 
     @property
     def num_items(self) -> int:
-        return self._eval_on_this_object('numItems')
+        return self._eval_on_this_object("numItems")
 
     """The root folder containing the contents of the project
     Items inside internal folders will not be shown"""
 
     @property
     def root_folder(self) -> object:
-        kwargs = self._eval_on_this_object('rootFolder')
+        kwargs = self._eval_on_this_object("rootFolder")
         return FolderItem(**kwargs) if kwargs else None
 
     # CUSTOM PROPERTIES
@@ -142,20 +143,22 @@ class Project(PydobeBaseObject):
     def close(self, save: bool = None) -> bool:
         """This will close the current project with an option to save changes or not"""
         if save is None:
-            return self._eval_on_this_object('close(CloseOptions.PROMPT_TO_SAVE_CHANGES)')
+            return self._eval_on_this_object(
+                "close(CloseOptions.PROMPT_TO_SAVE_CHANGES)"
+            )
         elif save:
-            return self._eval_on_this_object('close(CloseOptions.SAVE_CHANGES)')
+            return self._eval_on_this_object("close(CloseOptions.SAVE_CHANGES)")
         else:
-            return self._eval_on_this_object('close(CloseOptions.DO_NOT_SAVE_CHANGES)')
+            return self._eval_on_this_object("close(CloseOptions.DO_NOT_SAVE_CHANGES)")
 
     def save(self, path: str = None) -> bool:
         """This will save the current scene"""
         if path:
             file = File(**eval_script_returning_object(f'File("{path}")'))
             extend_file_object = format_to_extend(file)
-            return self._eval_on_this_object(f'save({extend_file_object})')
+            return self._eval_on_this_object(f"save({extend_file_object})")
         else:
-            return self._eval_on_this_object('save()')
+            return self._eval_on_this_object("save()")
 
     # CUSTOM FUNCTIONS
 
@@ -168,6 +171,7 @@ class Project(PydobeBaseObject):
 
 
 # ITEMS
+
 
 class Item(PydobeBaseObject):
     def __init__(self, pydobe_id=None):
@@ -182,7 +186,7 @@ class Item(PydobeBaseObject):
 
     @property
     def comment(self) -> str:
-        return self._eval_on_this_object('comment')
+        return self._eval_on_this_object("comment")
 
     @comment.setter
     def comment(self, value: str):
@@ -192,13 +196,13 @@ class Item(PydobeBaseObject):
 
     @property
     def id(self) -> int:
-        return self._eval_on_this_object('id')
+        return self._eval_on_this_object("id")
 
     """The colour of the label assigned to the item, expressed as an integer between 1-16. 0 = none"""
 
     @property
     def label(self) -> int:
-        return self._eval_on_this_object('label')
+        return self._eval_on_this_object("label")
 
     @label.setter
     def label(self, value: int or str):
@@ -212,7 +216,7 @@ class Item(PydobeBaseObject):
 
     @property
     def name(self) -> str:
-        return self._eval_on_this_object('name')
+        return self._eval_on_this_object("name")
 
     @name.setter
     def name(self, value: str):
@@ -222,14 +226,14 @@ class Item(PydobeBaseObject):
 
     @property
     def parent_folder(self) -> object:
-        kwargs = self._eval_on_this_object('parentFolder')
+        kwargs = self._eval_on_this_object("parentFolder")
         return FolderItem(**kwargs) if kwargs else None
 
     @parent_folder.setter
     def parent_folder(self, value: object):
         if value.type_name == "Folder":
             extend_value = format_to_extend(value)
-            self._eval_on_this_object(f'parentFolder = {extend_value}')
+            self._eval_on_this_object(f"parentFolder = {extend_value}")
         else:
             raise TypeError("Unable to set 'parent_folder', type must be 'Folder'")
 
@@ -237,7 +241,7 @@ class Item(PydobeBaseObject):
 
     @property
     def selected(self) -> bool:
-        return self._eval_on_this_object('selected')
+        return self._eval_on_this_object("selected")
 
     @selected.setter
     def selected(self, value: bool):
@@ -248,13 +252,14 @@ class Item(PydobeBaseObject):
 
     @property
     def type_name(self) -> str:
-        return self._eval_on_this_object('typeName')
+        return self._eval_on_this_object("typeName")
 
     # FUNCTIONS
 
     def remove(self):
         """Deletes this item from the project and the Project panel.
-        If the item is a FolderItem, all the items contained in the folder are also removed from the project"""
+        If the item is a FolderItem, all the items contained in the folder are also removed from the project
+        """
         self._eval_on_this_object("remove()")
 
 
@@ -278,14 +283,14 @@ class FolderItem(Item):
 
     @property
     def items(self) -> object:
-        kwargs = self._eval_on_this_object('items')
+        kwargs = self._eval_on_this_object("items")
         return ItemCollection(**kwargs) if kwargs else None
 
     """The number of items within the folder"""
 
     @property
     def num_items(self) -> int:
-        return self._eval_on_this_object('numItems')
+        return self._eval_on_this_object("numItems")
 
     # CUSTOM PROPERTIES
 
@@ -327,6 +332,7 @@ class FootageItem(AVItem):
 
 # COLLECTIONS
 
+
 class ItemCollection(PydobeBaseCollection):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id, "length")
@@ -346,13 +352,22 @@ class ItemCollection(PydobeBaseCollection):
 
     # FUNCTIONS
 
-    def add_comp(self, name: str, width: int, height: int, aspect_ratio: float, duration: float,
-                 frame_rate: float, duration_as_frames=True) -> object:
+    def add_comp(
+        self,
+        name: str,
+        width: int,
+        height: int,
+        aspect_ratio: float,
+        duration: float,
+        frame_rate: float,
+        duration_as_frames=True,
+    ) -> object:
         """Add a new Composition to the project"""
         if duration_as_frames:
             duration = current_format_to_time(duration, frame_rate)
         kwargs = self._eval_on_this_object(
-            f'addComp("{name}", {width}, {height}, {aspect_ratio}, {duration}, {frame_rate})')
+            f'addComp("{name}", {width}, {height}, {aspect_ratio}, {duration}, {frame_rate})'
+        )
         return CompositionItem(**kwargs)
 
     def add_folder(self, name: str) -> object:

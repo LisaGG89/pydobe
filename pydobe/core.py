@@ -6,6 +6,7 @@ HOST = "127.0.0.1"
 PORT = 2000
 PANEL_URL = f"http://{HOST}:{PORT}"
 
+
 class PydobeBaseObject(object):
     """Base object for every mirror object from ExtendScript"""
 
@@ -53,6 +54,7 @@ class PydobeBaseCollection(PydobeBaseObject):
         value = iter([self.__getitem__(i) for i in range(len(self))])
         return value
 
+
 def is_port_open():
     a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     location = (HOST, PORT)
@@ -61,9 +63,10 @@ def is_port_open():
     if result_of_check != 0:
         raise ConnectionError(message)
 
+
 def eval_script_returning_object(line: str):
     """Eval the line as ExtendScript code.
-    If the code returns an object, it will be stored with an id for pydobe to handle """
+    If the code returns an object, it will be stored with an id for pydobe to handle"""
 
     # Create ExtendScript to send
     script = "var tmp = {}".format(line)
@@ -86,8 +89,14 @@ def eval_script(code: str):
     """Send ExtendScript code to adobe software, retrieve and decode the response"""
 
     # send code to adobe software (adding try statement to prevent error popup message locking UI)
-    response = requests.post(PANEL_URL,
-                             json={"to_eval": "try{\n" + code + "\n}catch(e){e.error=true;ExtendJSON.stringify(e)}"})
+    response = requests.post(
+        PANEL_URL,
+        json={
+            "to_eval": "try{\n"
+            + code
+            + "\n}catch(e){e.error=true;ExtendJSON.stringify(e)}"
+        },
+    )
 
     # handle response
     data = response.text
