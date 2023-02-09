@@ -31,15 +31,21 @@ class Application(PydobeBaseObject):
         kwargs = self._eval_on_this_object('newProject()')
         return Project(**kwargs) if kwargs else None
 
-    def open(self, path=None):
+    def open(self, path=None, save=None):
         """A new Project object for the specified project, or null if the user cancels the Open dialog box."""
+        if save is None:
+            pass
+        elif save:
+            self.project.close(save=True)
+        else:
+            self.project.close(save=False)
         if path:
             file = File(path, **eval_script_returning_object(f'File("{path}")'))
             extend_file_object = format_to_extend(file)
             kwargs = self._eval_on_this_object(f'open({extend_file_object})')
         else:
             kwargs = self._eval_on_this_object(f'open()')
-        return Project(**kwargs)
+        return Project(**kwargs) if kwargs else None
 
 
 class Project(PydobeBaseObject):
