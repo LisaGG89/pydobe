@@ -63,6 +63,8 @@ class Project(PydobeBaseObject):
     def active_item(self) -> object:
         item = None
         kwargs = self._eval_on_this_object("activeItem")
+        if not kwargs:
+            raise TypeError("'active_item' requires precisely one item to be selected")
         type_name = self._eval_on_this_object("activeItem.typeName")
         if type_name == "Composition":
             item = CompositionItem(**kwargs)
