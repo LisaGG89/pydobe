@@ -153,6 +153,17 @@ class Project(PydobeBaseObject):
         else:
             return self._eval_on_this_object("close(CloseOptions.DO_NOT_SAVE_CHANGES)")
 
+    def import_file(self, path: str, sequence: bool = False, force_alphabetical: bool = False):
+        """This will import a file"""
+        import_options = ImportOptions(**eval_script_returning_object('new ImportOptions()'))
+        file = File(**eval_script_returning_object(f'File("{path}")'))
+        import_options.file = file
+        import_options.sequence = sequence
+        import_options.force_alphabetical = force_alphabetical
+        extend_import_options = format_to_extend(import_options)
+        kwargs = self._eval_on_this_object(f'importFile({extend_import_options})')
+        return FootageItem(**kwargs)
+
     def save(self, path: str = None) -> bool:
         """This will save the current scene"""
         if path:
@@ -376,3 +387,44 @@ class ItemCollection(PydobeBaseCollection):
         """Add a new Folder to the project"""
         kwargs = self._eval_on_this_object(f'addFolder("{name}")')
         return FolderItem(**kwargs)
+
+
+# MISC
+
+class ImportOptions(PydobeBaseObject):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+    """The file object to be imported"""
+
+    @property
+    def file(self) -> object:
+        kwargs = self._eval_on_this_object('file')
+        return File(**kwargs) if kwargs else None
+
+    @file.setter
+    def file(self, value: object):
+        extend_object = format_to_extend(value)
+        self._eval_on_this_object(f"file = {extend_object}")
+
+    """Creates sequence from available files in alphateical order with no gaps"""
+
+    @property
+    def force_alphabetical(self) -> bool:
+        return self._eval_on_this_object('forceAlphabetical')
+
+    @force_alphabetical.setter
+    def force_alphabetical(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f"forceAlphabetical = {extend_value}")
+
+    """Import as sequence"""
+
+    @property
+    def sequence(self) -> bool:
+        return self._eval_on_this_object('sequence')
+
+    @sequence.setter
+    def sequence(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f"sequence = {extend_value}")
