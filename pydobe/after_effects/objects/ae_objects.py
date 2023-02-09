@@ -380,6 +380,14 @@ class FootageItem(AVItem):
         extend_file_object = format_to_extend(file)
         self._eval_on_this_object(f'replace({extend_file_object})')
 
+    def replace_with_placeholder(self, name: str, width: int, height: int, frame_rate: float, duration: float,
+                                 duration_as_frames=True):
+        """Changes the source of this FootageItem to the specified placeholder"""
+        if duration_as_frames:
+            duration = current_format_to_time(duration, frame_rate)
+        self._eval_on_this_object(f'replaceWithPlaceholder("{name}", {width}, {height}, {frame_rate}, {duration})')
+
+
     def replace_with_sequence(self, path: str, force_alphabetical: bool = False):
         """Changes the source of this Footage Item to the specified image sequence."""
         file = File(**eval_script_returning_object(f'File("{path}")'))
