@@ -60,7 +60,67 @@ app.new_project()  # This will display a user prompt
 
 ```
 
+### Working with items
 
+```
+project = pydobe.objects.app.project
+
+# Check how many items are in the project
+print(project.num_items)
+
+# Get the names of all the items in the project
+for item in project.items:
+    print(item.name)
+    # check which items are selected
+    if item.selected:
+        print(f'{item.name} is selected')
+
+# Get the active item
+my_item = project.active_item  # This attribute requires precisely 1 item to be selected
+
+# Find out what type of item it is
+print(my_item.type_name)
+
+# Find the parent folder of the item
+print(my_item.parent_folder)
+
+# Get the names of all the compositions
+for comp in project.compositions:
+    print(comp.name)
+
+# Get item by name
+footage_folder = project.item_by_name("My Footage")
+
+# Remove items from the scene:
+for child in footage_folder.items:
+    child.remove()
+    
+```
+
+### Adding items to a project
+
+```
+project = pydobe.objects.app.project
+
+# Create some folders
+# Add a comment and set a label colour
+footage_folder = project.items.add_folder("Footage")
+footage_folder.comment = "This is where we keep our footage"
+footage_folder.label = "Fuchsia"
+
+comps_folder = project.items.add_folder("Compositions")
+comps_folder.comment = "This is where we keep our comps"
+comps_folder.label = "Blue"
+
+# Add some footage
+# Not implemented yet
+
+# Create a composition
+my_comp = project.items.add_comp("My New Comp", 1920, 1080, 1, 100, 25)
+# duration is set using frames, to set duration using seconds:
+# my_comp = project.items.add_comp("My New Comp", 1920, 1080, 1, 4, 25, duration_as_frames=False)
+
+```
 # Thanks
 
 Thank you to Quentin Masingarbe for his Pymiere repository, as well as sharing his knowledge with me.
