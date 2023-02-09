@@ -1,6 +1,4 @@
-import collections
-
-from pydobe.core import PydobeBaseObject, PydobeBaseCollection, format_to_extend, eval_script_returning_object
+from pydobe.core import PydobeBaseObject, PydobeBaseCollection, format_to_extend
 from pydobe.after_effects.data import *
 from pydobe.after_effects.ae_utils import *
 
@@ -42,7 +40,7 @@ class Application(PydobeBaseObject):
         else:
             self.project.close(save=False)
         if path:
-            file = File(path, **eval_script_returning_object(f'File("{path}")'))
+            file = File(**eval_script_returning_object(f'File("{path}")'))
             extend_file_object = format_to_extend(file)
             kwargs = self._eval_on_this_object(f'open({extend_file_object})')
         else:
@@ -152,7 +150,7 @@ class Project(PydobeBaseObject):
     def save(self, path: str = None) -> bool:
         """This will save the current scene"""
         if path:
-            file = File(path, **eval_script_returning_object(f'File("{path}")'))
+            file = File(**eval_script_returning_object(f'File("{path}")'))
             extend_file_object = format_to_extend(file)
             return self._eval_on_this_object(f'save({extend_file_object})')
         else:
@@ -365,7 +363,7 @@ class ItemCollection(PydobeBaseCollection):
 # ADOBE GENERAL OBJECTS
 
 class File(PydobeBaseObject):
-    def __init__(self, path=None, pydobe_id=None):
+    def __init__(self,  pydobe_id=None):
         super().__init__(pydobe_id)
 
     def __str__(self):
