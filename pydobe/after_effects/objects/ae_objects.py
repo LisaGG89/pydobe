@@ -337,6 +337,22 @@ class FolderItem(Item):
                 folder_items.append(item)
         return folder_items
 
+    # FUNCTIONS
+
+    def item(self, sub_index: int) -> object:
+        """Returns the top-level item in this folder at the specified index position."""
+        item = None
+        sub_index += 1
+        kwargs = self._eval_on_this_object(f'item({sub_index})')
+        type_name = self._eval_on_this_object(f'item({sub_index}).typeName')
+        if type_name == "Composition":
+            item = CompositionItem(**kwargs)
+        if type_name == "Footage":
+            item = FootageItem(**kwargs)
+        elif type_name == "Folder":
+            item = FolderItem(**kwargs)
+        return item
+
 
 class FootageItem(AVItem):
     def __init__(self, pydobe_id=None):
@@ -386,7 +402,6 @@ class FootageItem(AVItem):
         if duration_as_frames:
             duration = current_format_to_time(duration, frame_rate)
         self._eval_on_this_object(f'replaceWithPlaceholder("{name}", {width}, {height}, {frame_rate}, {duration})')
-
 
     def replace_with_sequence(self, path: str, force_alphabetical: bool = False):
         """Changes the source of this Footage Item to the specified image sequence."""
@@ -451,14 +466,14 @@ class ItemCollection(PydobeBaseCollection):
     # FUNCTIONS
 
     def add_comp(
-        self,
-        name: str,
-        width: int,
-        height: int,
-        aspect_ratio: float,
-        duration: float,
-        frame_rate: float,
-        duration_as_frames=True,
+            self,
+            name: str,
+            width: int,
+            height: int,
+            aspect_ratio: float,
+            duration: float,
+            frame_rate: float,
+            duration_as_frames=True,
     ) -> object:
         """Add a new Composition to the project"""
         if duration_as_frames:
