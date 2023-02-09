@@ -342,6 +342,30 @@ class FootageItem(AVItem):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id)
 
+    # PROPERTIES
+
+    """The file object associated with this footage"""
+
+    @property
+    def file(self) -> object:
+        kwargs = self._eval_on_this_object('file')
+        return File(**kwargs) if kwargs else None
+
+    # FUNCTIONS
+
+    def replace(self, path: str):
+        """Changes the source of this Footage Item to the specified file"""
+        file = File(**eval_script_returning_object(f'File("{path}")'))
+        extend_file_object = format_to_extend(file)
+        self._eval_on_this_object(f'replace({extend_file_object})')
+
+    def replace_with_sequence(self, path: str, force_alphabetical: bool = False):
+        """Changes the source of this Footage Item to the specified image sequence."""
+        file = File(**eval_script_returning_object(f'File("{path}")'))
+        extend_file_object = format_to_extend(file)
+        force_alphabetical = format_to_extend(force_alphabetical)
+        self._eval_on_this_object(f'replaceWithSequence({extend_file_object}, {force_alphabetical})')
+
 
 # COLLECTIONS
 
