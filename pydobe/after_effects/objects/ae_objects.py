@@ -1,3 +1,5 @@
+import collections
+
 from pydobe.core import PydobeBaseObject, PydobeBaseCollection, format_to_extend, eval_script_returning_object
 from pydobe.after_effects.data import *
 from pydobe.after_effects.ae_utils import *
@@ -14,13 +16,13 @@ class Application(PydobeBaseObject):
     """ This is the current active project. """
 
     @property
-    def project(self):
+    def project(self) -> object:
         kwargs = self._eval_on_this_object('project')
         return Project(**kwargs) if kwargs else None
 
     # FUNCTIONS
 
-    def new_project(self, save=None):
+    def new_project(self, save: bool = None) -> object:
         """ Create a new empty project."""
         if save is None:
             pass
@@ -31,7 +33,7 @@ class Application(PydobeBaseObject):
         kwargs = self._eval_on_this_object('newProject()')
         return Project(**kwargs) if kwargs else None
 
-    def open(self, path=None, save=None):
+    def open(self, path: str = None, save: bool = None) -> object:
         """A new Project object for the specified project, or null if the user cancels the Open dialog box."""
         if save is None:
             pass
@@ -86,21 +88,21 @@ class Project(PydobeBaseObject):
     """All of the items in the project"""
 
     @property
-    def items(self):
+    def items(self) -> object:
         kwargs = self._eval_on_this_object('items')
         return ItemCollection(**kwargs) if kwargs else None
 
     """The number of items within the project"""
 
     @property
-    def num_items(self):
+    def num_items(self) -> int:
         return self._eval_on_this_object('numItems')
 
     """The root folder containing the contents of the project
     Items inside internal folders will not be shown"""
 
     @property
-    def root_folder(self):
+    def root_folder(self) -> object:
         kwargs = self._eval_on_this_object('rootFolder')
         return FolderItem(**kwargs) if kwargs else None
 
@@ -109,7 +111,7 @@ class Project(PydobeBaseObject):
     """All of the composition items within the project"""
 
     @property
-    def compositions(self):
+    def compositions(self) -> list:
         composition_items = []
         for item in self.items:
             if item.type_name == "Composition":
@@ -119,7 +121,7 @@ class Project(PydobeBaseObject):
     """All of the footage items within the project"""
 
     @property
-    def footages(self):
+    def footages(self) -> list:
         footage_items = []
         for item in self.items:
             if item.type_name == "Footage":
@@ -129,7 +131,7 @@ class Project(PydobeBaseObject):
     """All of the folder items within the project"""
 
     @property
-    def folders(self):
+    def folders(self) -> list:
         folder_items = []
         for item in self.items:
             if item.type_name == "Folder":
@@ -138,7 +140,7 @@ class Project(PydobeBaseObject):
 
     # FUNCTIONS
 
-    def close(self, save=None):
+    def close(self, save: bool = None) -> bool:
         """This will close the current project with an option to save changes or not"""
         if save is None:
             return self._eval_on_this_object('close(CloseOptions.PROMPT_TO_SAVE_CHANGES)')
@@ -147,7 +149,7 @@ class Project(PydobeBaseObject):
         else:
             return self._eval_on_this_object('close(CloseOptions.DO_NOT_SAVE_CHANGES)')
 
-    def save(self, path: str = None):
+    def save(self, path: str = None) -> bool:
         """This will save the current scene"""
         if path:
             file = File(path, **eval_script_returning_object(f'File("{path}")'))
@@ -158,7 +160,7 @@ class Project(PydobeBaseObject):
 
     # CUSTOM FUNCTIONS
 
-    def item_by_name(self, name):
+    def item_by_name(self, name: str) -> object:
         """Get an item by its name from within this project"""
         for item in self.items:
             if item.name == name:
@@ -254,8 +256,7 @@ class Item(PydobeBaseObject):
     def remove(self):
         """Deletes this item from the project and the Project panel.
         If the item is a FolderItem, all the items contained in the folder are also removed from the project"""
-        return self._eval_on_this_object("remove()")
-
+        self._eval_on_this_object("remove()")
 
 
 class AVItem(Item):
@@ -277,14 +278,14 @@ class FolderItem(Item):
     """All of the items in the folder"""
 
     @property
-    def items(self):
+    def items(self) -> object:
         kwargs = self._eval_on_this_object('items')
         return ItemCollection(**kwargs) if kwargs else None
 
     """The number of items within the folder"""
 
     @property
-    def num_items(self):
+    def num_items(self) -> int:
         return self._eval_on_this_object('numItems')
 
     # CUSTOM PROPERTIES
@@ -292,7 +293,7 @@ class FolderItem(Item):
     """The composition items found in the folder"""
 
     @property
-    def compositions(self):
+    def compositions(self) -> list:
         composition_items = []
         for item in self.items:
             if item.type_name == "Composition":
@@ -302,7 +303,7 @@ class FolderItem(Item):
     """The footage items found in the folder"""
 
     @property
-    def footages(self):
+    def footages(self) -> list:
         footage_items = []
         for item in self.items:
             if item.type_name == "Footage":
@@ -312,12 +313,13 @@ class FolderItem(Item):
     """The folder items found in the folder"""
 
     @property
-    def folders(self):
+    def folders(self) -> list:
         folder_items = []
         for item in self.items:
             if item.type_name == "Folder":
                 folder_items.append(item)
         return folder_items
+
 
 class FootageItem(AVItem):
     def __init__(self, pydobe_id=None):
@@ -330,7 +332,7 @@ class ItemCollection(PydobeBaseCollection):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id, "length")
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int):
         item = None
         index = index + 1
         kwargs = super(ItemCollection, self).__getitem__(index)
@@ -374,17 +376,17 @@ class File(PydobeBaseObject):
     "The full path name"
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         return self._eval_on_this_object('fullName')
 
     "The file name portion of the absolute URI, without the path specification."
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._eval_on_this_object('name')
 
     "The path portion of the absolute URI, without the file name"
 
     @property
-    def path(self):
+    def path(self) -> str:
         return self._eval_on_this_object('path')
