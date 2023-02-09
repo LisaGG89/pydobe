@@ -36,9 +36,10 @@ class Application(PydobeBaseObject):
         if path:
             file = File(path, **eval_script_returning_object(f'File("{path}")'))
             extend_file_object = format_to_extend(file)
-            return self._eval_on_this_object(f'open({extend_file_object})')
+            kwargs = self._eval_on_this_object(f'open({extend_file_object})')
         else:
-            return self._eval_on_this_object(f'open()')
+            kwargs = self._eval_on_this_object(f'open()')
+        return Project(**kwargs)
 
 
 class Project(PydobeBaseObject):
