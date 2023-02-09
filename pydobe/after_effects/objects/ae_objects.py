@@ -353,6 +353,11 @@ class FootageItem(AVItem):
 
     # FUNCTIONS
 
+    def open_in_viewer(self):
+        """Opens the comp in a panel, moves it to the front and gives it focus"""
+        kwargs = self._eval_on_this_object('openInViewer()')
+        return Viewer(**kwargs)
+
     def replace(self, path: str):
         """Changes the source of this Footage Item to the specified file"""
         file = File(**eval_script_returning_object(f'File("{path}")'))
@@ -456,3 +461,8 @@ class ImportOptions(PydobeBaseObject):
     def sequence(self, value: bool):
         extend_value = format_to_extend(value)
         self._eval_on_this_object(f"sequence = {extend_value}")
+
+
+class Viewer(PydobeBaseObject):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
