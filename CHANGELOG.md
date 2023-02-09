@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- app.open now returns project object
+- `app.open()` now returns project object
   
 ## [0.1.0] - 2023-02-07
 
