@@ -24,7 +24,7 @@ Snippets and examples for potential uses within After Effects
 
 ### Working with projects
 
-```
+```python
 app = pydobe.objects.app
 
 # Open a Project
@@ -62,7 +62,7 @@ app.new_project()  # This will display a user prompt
 
 ### Working with items
 
-```
+```python
 project = pydobe.objects.app.project
 
 # Check how many items are in the project
@@ -99,8 +99,7 @@ for child in footage_folder.items:
 
 ### Adding items to a project
 
-```
-import pydobe
+```python
 
 project = pydobe.objects.app.project
 

@@ -178,6 +178,10 @@ class Project(PydobeBaseObject):
         else:
             return self._eval_on_this_object("save()")
 
+    def save_with_dialog(self) -> bool:
+        """This will prompt the user to save with a dialog box"""
+        return self._eval_on_this_object('saveWithDialog()')
+
     # CUSTOM FUNCTIONS
 
     def item_by_name(self, name: str) -> object:
