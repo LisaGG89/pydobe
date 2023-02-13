@@ -19,7 +19,11 @@ my_comp.parent_folder = comps_folder
 # ("My New Comp", 1920, 1080, 1, 4, 25, duration_as_frames=False)
 
 # Add some footage
-list_of_paths = ["path/to/my/file_01_v001_0000.png", "path/to/my/file_02_v001_0000.png", "path/to/my/file_03_v001_0000.png"]
+list_of_paths = [
+    "path/to/my/file_01_v001_0000.png",
+    "path/to/my/file_02_v001_0000.png",
+    "path/to/my/file_03_v001_0000.png",
+]
 
 for path in list_of_paths:
     footage = project.import_file(path)
@@ -29,7 +33,11 @@ for path in list_of_paths:
     footage.parent_folder = footage_folder
 
 # Replace the footage with a new version
-list_of_replacement_paths = ["path/to/my/file_01_v002_0000.png", "path/to/my/file_02_v002_0000.png", "path/to/my/file_03_v002_0000.png"]
+list_of_replacement_paths = [
+    "path/to/my/file_01_v002_0000.png",
+    "path/to/my/file_02_v002_0000.png",
+    "path/to/my/file_03_v002_0000.png",
+]
 
 for footage in footage_folder.items:
     for new_path in list_of_replacement_paths:

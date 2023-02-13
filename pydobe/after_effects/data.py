@@ -23,9 +23,5 @@ label_dictionary = IntStringDict(
 )
 
 alpha_dictionary = IntStringDict(
-    {
-        5413: "Ignore",
-        5412: "Straight",
-        5414: "Premultiplied"
-    }
+    {5413: "Ignore", 5412: "Straight", 5414: "Premultiplied"}
 )

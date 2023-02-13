@@ -21,9 +21,10 @@ class IntStringDict(UserDict):
         elif type(key).__name__ == "str":
             self.data[value] = key
 
+
 def hex_to_rgb(hex, float=False):
-    hex_value = hex.lstrip('#')
-    colour_value_list = list(int(hex_value[i:i + 2], 16) for i in (0, 2, 4))
+    hex_value = hex.lstrip("#")
+    colour_value_list = list(int(hex_value[i : i + 2], 16) for i in (0, 2, 4))
     if float:
         colour_value_list = rgb_int_to_float(colour_value_list)
     return colour_value_list

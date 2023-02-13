@@ -80,7 +80,9 @@ def eval_script_returning_object(line: str):
     # Extract pydobe ID if object is returned
     if isinstance(result, dict) and result.get("isObject"):
         if result["objectType"].endswith("Source"):
-            kwargs = dict(pydobe_id=result["pydobeId"], object_type=result["objectType"])
+            kwargs = dict(
+                pydobe_id=result["pydobeId"], object_type=result["objectType"]
+            )
         elif result["objectType"] == "Array" and "=" not in line:
             data_list = convert_to_list(line)
             return data_list

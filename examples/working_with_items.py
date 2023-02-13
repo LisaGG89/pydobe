@@ -10,7 +10,7 @@ for item in project.items:
     print(item.name)
     # check which items are selected
     if item.selected:
-        print(f'{item.name} is selected')
+        print(f"{item.name} is selected")
 
 # Get the active item
 my_item = project.active_item  # This attribute requires precisely 1 item to be selected
@@ -31,4 +31,3 @@ footage_folder = project.item_by_name("My Footage")
 # Remove items from the scene:
 for child in footage_folder.items:
     child.remove()
-
