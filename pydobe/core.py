@@ -67,9 +67,8 @@ def is_port_open():
 def eval_script_returning_object(line: str):
     """Eval the line as ExtendScript code.
     If the code returns an object, it will be stored with an id for pydobe to handle"""
-
     # Create ExtendScript to send
-    script = "var tmp = {}".format(line)
+    script = f"var tmp = {line}"
     script += """\nif(typeof tmp === 'object' && tmp !== null){
             var newPydobeId = $._pydobe.generateId();
             $._pydobe[newPydobeId] = tmp;
@@ -80,7 +79,15 @@ def eval_script_returning_object(line: str):
     result = eval_script(script)
     # Extract pydobe ID if object is returned
     if isinstance(result, dict) and result.get("isObject"):
-        kwargs = dict(pydobe_id=result["pydobeId"])
+        if result["objectType"].endswith("Source"):
+            kwargs = dict(
+                pydobe_id=result["pydobeId"], object_type=result["objectType"]
+            )
+        elif result["objectType"] == "Array" and "=" not in line:
+            data_list = convert_to_list(line)
+            return data_list
+        else:
+            kwargs = dict(pydobe_id=result["pydobeId"])
         return kwargs
     return result
 
@@ -111,8 +118,18 @@ def eval_script(code: str):
 
 def format_to_extend(obj):
     """Format the argument to ExtendScript"""
-
     if isinstance(obj, PydobeBaseObject):
-        return "$._pydobe['{}']".format(obj.pydobe_id)
+        return f"$._pydobe['{obj.pydobe_id}']"
     elif isinstance(obj, bool):
         return str(obj).lower()
+
+
+def convert_to_list(line):
+    data_list = []
+    count_line = f"{line[:-1]}.length;"
+    count = eval_script_returning_object(count_line)
+    for index in range(count):
+        value_line = f"{line[:-1]}[{index}];"
+        value = eval_script_returning_object(value_line)
+        data_list.append(value)
+    return data_list

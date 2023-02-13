@@ -32,4 +32,3 @@ app.project.close()  # This will display a user prompt
 app.new_project()  # This will display a user prompt
 # app.new_project(save=True)  # This will save before opening a new project
 # app.new_project(save=False)  # This will not save before opening a new project
-

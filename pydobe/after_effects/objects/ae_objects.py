@@ -1,5 +1,6 @@
 from pydobe.core import PydobeBaseObject, PydobeBaseCollection, format_to_extend
 from pydobe.adobe_objects import File
+from pydobe.utils import format_colour
 from pydobe.after_effects.data import *
 from pydobe.after_effects.ae_utils import *
 
@@ -152,6 +153,21 @@ class Project(PydobeBaseObject):
             return self._eval_on_this_object("close(CloseOptions.SAVE_CHANGES)")
         else:
             return self._eval_on_this_object("close(CloseOptions.DO_NOT_SAVE_CHANGES)")
+
+    def import_file(
+        self, path: str, sequence: bool = False, force_alphabetical: bool = False
+    ):
+        """This will import a file"""
+        import_options = ImportOptions(
+            **eval_script_returning_object("new ImportOptions()")
+        )
+        file = File(**eval_script_returning_object(f'File("{path}")'))
+        import_options.file = file
+        import_options.sequence = sequence
+        import_options.force_alphabetical = force_alphabetical
+        extend_import_options = format_to_extend(import_options)
+        kwargs = self._eval_on_this_object(f"importFile({extend_import_options})")
+        return FootageItem(**kwargs) if kwargs else None
 
     def save(self, path: str = None) -> bool:
         """This will save the current scene"""
@@ -330,10 +346,285 @@ class FolderItem(Item):
                 folder_items.append(item)
         return folder_items
 
+    # FUNCTIONS
+
+    def item(self, sub_index: int) -> object:
+        """Returns the top-level item in this folder at the specified index position."""
+        item = None
+        sub_index += 1
+        kwargs = self._eval_on_this_object(f"item({sub_index})")
+        type_name = self._eval_on_this_object(f"item({sub_index}).typeName")
+        if type_name == "Composition":
+            item = CompositionItem(**kwargs)
+        if type_name == "Footage":
+            item = FootageItem(**kwargs)
+        elif type_name == "Folder":
+            item = FolderItem(**kwargs)
+        return item
+
 
 class FootageItem(AVItem):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id)
+
+    # PROPERTIES
+
+    """The footage source, an object that contains all of the settings related to that footage item, 
+    including those that are normally accessed through the Interpret Footage dialog box"""
+
+    @property
+    def main_source(self) -> object:
+        item = None
+        kwargs = self._eval_on_this_object("mainSource")
+        object_type = kwargs["object_type"]
+        if object_type == "FileSource":
+            item = FileSource(**kwargs)
+        elif object_type == "SolidSource":
+            item = SolidSource(**kwargs)
+        elif object_type == "PlaceholderSource":
+            item = PlaceHolderSource(**kwargs)
+        return item
+
+    """The file object associated with this footage"""
+
+    @property
+    def file(self) -> object:
+        kwargs = self._eval_on_this_object("file")
+        return File(**kwargs) if kwargs else None
+
+    # FUNCTIONS
+
+    def open_in_viewer(self):
+        """Opens the comp in a panel, moves it to the front and gives it focus"""
+        kwargs = self._eval_on_this_object("openInViewer()")
+        return Viewer(**kwargs) if kwargs else None
+
+    def replace(self, path: str):
+        """Changes the source of this Footage Item to the specified file"""
+        file = File(**eval_script_returning_object(f'File("{path}")'))
+        extend_file_object = format_to_extend(file)
+        self._eval_on_this_object(f"replace({extend_file_object})")
+
+    def replace_with_placeholder(
+        self,
+        name: str,
+        width: int,
+        height: int,
+        frame_rate: float,
+        duration: float,
+        duration_as_frames=True,
+    ):
+        """Changes the source of this FootageItem to the specified placeholder"""
+        if duration_as_frames:
+            duration = current_format_to_time(duration, frame_rate)
+        self._eval_on_this_object(
+            f'replaceWithPlaceholder("{name}", {width}, {height}, {frame_rate}, {duration})'
+        )
+
+    def replace_with_sequence(self, path: str, force_alphabetical: bool = False):
+        """Changes the source of this Footage Item to the specified image sequence."""
+        file = File(**eval_script_returning_object(f'File("{path}")'))
+        extend_file_object = format_to_extend(file)
+        force_alphabetical = format_to_extend(force_alphabetical)
+        self._eval_on_this_object(
+            f"replaceWithSequence({extend_file_object}, {force_alphabetical})"
+        )
+
+    def replace_with_solid(
+        self, colour: list, name: str, width: int, height: int, pixel_aspect: float
+    ):
+        """Changes the source of this FootageItem to the specified solid"""
+        self._eval_on_this_object(
+            f'replaceWithSolid({colour},"{name}", {width}, {height}, {pixel_aspect})'
+        )
+
+
+# SOURCES
+
+
+class FootageSource(PydobeBaseObject):
+    def __init__(self, pydobe_id=None, object_type=None):
+        super().__init__(pydobe_id)
+        self.object_type = object_type
+
+    # PROPERTIES
+
+    @property
+    def type_name(self):
+        return self.object_type
+
+    """Defines how the alpha information in the footage is interpreted."""
+
+    @property
+    def alpha_mode(self) -> int:
+        return self._eval_on_this_object("alphaMode")
+
+    @alpha_mode.setter
+    def alpha_mode(self, value: str or int):
+        if type(value) == str:
+            value = alpha_dictionary[value]
+        self._eval_on_this_object(f"alphaMode = {value}")
+
+    """A frame rate to use instead of the native frame rate value."""
+
+    @property
+    def conform_frame_rate(self) -> float:
+        return self._eval_on_this_object("conformFrameRate")
+
+    @conform_frame_rate.setter
+    def conform_frame_rate(self, value: float):
+        self._eval_on_this_object(f'conformFrameRate = "{value}"')
+
+    """The effective frame rate as displayed and rendered in compositions by After Effects."""
+
+    @property
+    def display_frame_rate(self) -> float:
+        return self._eval_on_this_object("displayFrameRate")
+
+    """How the fields are to be separated in non-still footage."""
+    # todo can add dict to make setting easier
+
+    @property
+    def field_separation_type(self) -> int:
+        return self._eval_on_this_object("fieldSeparationType")
+
+    @field_separation_type.setter
+    def field_separation_type(self, value: int):
+        self._eval_on_this_object(f"fieldSeparationType = {value}")
+
+    """When true, the footage has an alpha component."""
+
+    @property
+    def has_alpha(self) -> bool:
+        return self._eval_on_this_object("hasAlpha")
+
+    """When true, After Effects performs high-quality field separation."""
+
+    @property
+    def high_quality_field_separation(self) -> bool:
+        return self._eval_on_this_object("highQualityFieldSeparation")
+
+    @high_quality_field_separation.setter
+    def high_quality_field_separation(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f"highQualityFieldSeparation = {extend_value}")
+
+    """When true, the footage has an alpha component."""
+
+    @property
+    def invert_alpha(self) -> bool:
+        return self._eval_on_this_object("invertAlpha")
+
+    @invert_alpha.setter
+    def invert_alpha(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f"invertAlpha = {extend_value}")
+
+    """When true the footage is still; when false, it has a time-based component."""
+
+    @property
+    def is_still(self) -> bool:
+        return self._eval_on_this_object("isStill")
+
+    """The number of times that the footage is to be played consecutively when used in a composition."""
+
+    @property
+    def loop(self) -> int:
+        return self._eval_on_this_object("loop")
+
+    @loop.setter
+    def loop(self, value: int):
+        self._eval_on_this_object(f"loop = {value}")
+
+    """The native frame rate of the footage."""
+
+    @property
+    def native_frame_rate(self) -> float:
+        return self._eval_on_this_object("nativeFrameRate")
+
+    """The color to be premultiplied."""
+
+    @property
+    def premul_colour(self) -> int:
+        return self._eval_on_this_object("premulColor")
+
+    @premul_colour.setter
+    def premul_colour(self, value: list or str):
+        colour = format_colour(value)
+        self._eval_on_this_object(f"premulColor = {colour}")
+
+    """How the pulldowns are to be removed when field separation is used"""
+    # todo can add dict to make setting easier
+
+    @property
+    def remove_pulldown(self) -> int:
+        return self._eval_on_this_object("removePulldown")
+
+    @remove_pulldown.setter
+    def remove_pulldown(self, value: int):
+        self._eval_on_this_object(f"removePulldown = {value}")
+
+    # FUNCTIONS
+
+    def guess_alpha_mode(self):
+        """Sets alphaMode, premulColor, and invertAlpha to the best estimates for this footage source"""
+        self._eval_on_this_object("guessAlphaMode()")
+
+    def guess_pulldown(self, advance_24p=False):
+        """Sets fieldSeparationType and removePulldown to the best estimates for this footage source."""
+        if advance_24p:
+            self._eval_on_this_object(f"guessPulldown(PulldownMethod.ADVANCE_24P)")
+        else:
+            self._eval_on_this_object(f"guessPulldown(PulldownMethod.PULLDOWN_3_2)")
+
+
+class FileSource(FootageSource):
+    def __init__(self, pydobe_id=None, object_type=None):
+        super().__init__(pydobe_id, object_type)
+
+    # PROPERTIES
+
+    """The file"""
+
+    @property
+    def file(self):
+        kwargs = self._eval_on_this_object("file")
+        return File(**kwargs) if kwargs else None
+
+    """The path and filename of footage that is missing from this asset."""
+
+    @property
+    def missing_footage_path(self):
+        return self._eval_on_this_object("missingFootagePath")
+
+    # FUNCTIONS
+
+    def reload(self):
+        """Reloads the asset from the file."""
+        return self._eval_on_this_object("reload()")
+
+
+class SolidSource(FootageSource):
+    def __init__(self, pydobe_id=None, object_type=None):
+        super().__init__(pydobe_id, object_type)
+
+    # PROPERTIES
+
+    """The color of the solid"""
+
+    @property
+    def colour(self) -> float:
+        return self._eval_on_this_object("color")
+
+    @colour.setter
+    def colour(self, value: list or str):
+        colour = format_colour(value)
+        self._eval_on_this_object(f"color = {colour}")
+
+
+class PlaceHolderSource(FootageSource):
+    def __init__(self, pydobe_id=None, object_type=None):
+        super().__init__(pydobe_id, object_type)
 
 
 # COLLECTIONS
@@ -374,9 +665,81 @@ class ItemCollection(PydobeBaseCollection):
         kwargs = self._eval_on_this_object(
             f'addComp("{name}", {width}, {height}, {aspect_ratio}, {duration}, {frame_rate})'
         )
-        return CompositionItem(**kwargs)
+        return CompositionItem(**kwargs) if kwargs else None
 
     def add_folder(self, name: str) -> object:
         """Add a new Folder to the project"""
         kwargs = self._eval_on_this_object(f'addFolder("{name}")')
-        return FolderItem(**kwargs)
+        return FolderItem(**kwargs) if kwargs else None
+
+
+# MISC
+
+
+class ImportOptions(PydobeBaseObject):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+    """The file object to be imported"""
+
+    @property
+    def file(self) -> object:
+        kwargs = self._eval_on_this_object("file")
+        return File(**kwargs) if kwargs else None
+
+    @file.setter
+    def file(self, value: object):
+        extend_object = format_to_extend(value)
+        self._eval_on_this_object(f"file = {extend_object}")
+
+    """Creates sequence from available files in alphateical order with no gaps"""
+
+    @property
+    def force_alphabetical(self) -> bool:
+        return self._eval_on_this_object("forceAlphabetical")
+
+    @force_alphabetical.setter
+    def force_alphabetical(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f"forceAlphabetical = {extend_value}")
+
+    """Import as sequence"""
+
+    @property
+    def sequence(self) -> bool:
+        return self._eval_on_this_object("sequence")
+
+    @sequence.setter
+    def sequence(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f"sequence = {extend_value}")
+
+
+class Viewer(PydobeBaseObject):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+    # PROPERTIES
+
+    """When true, indicates if the viewer panel is focused, and thereby frontmost."""
+
+    @property
+    def active(self) -> bool:
+        return self._eval_on_this_object("active")
+
+    """When true, indicates if the viewer panel is at its maximized size."""
+
+    @property
+    def maximised(self) -> bool:
+        return self._eval_on_this_object("maximized")
+
+    @maximised.setter
+    def maximised(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f"maximized = {extend_value}")
+
+    # FUNCTIONS
+
+    def set_active(self) -> bool:
+        """Moves the viewer panel to the front and places focus on it, making it active."""
+        return self._eval_on_this_object("setActive()")
