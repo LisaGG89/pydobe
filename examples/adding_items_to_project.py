@@ -36,7 +36,5 @@ for footage in footage_folder.items:
         file_name = new_path.split("/")[-1]
         unique_file = file_name.rsplit("_", 2)[0]
         unique_footage = footage.name.rsplit("_", 2)[0]
-        print(unique_footage)
-        print(unique_file)
         if unique_file == unique_footage:
             footage.replace(new_path)
