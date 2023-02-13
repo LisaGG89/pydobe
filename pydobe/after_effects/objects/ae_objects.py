@@ -163,7 +163,7 @@ class Project(PydobeBaseObject):
         import_options.force_alphabetical = force_alphabetical
         extend_import_options = format_to_extend(import_options)
         kwargs = self._eval_on_this_object(f'importFile({extend_import_options})')
-        return FootageItem(**kwargs)
+        return FootageItem(**kwargs) if kwargs else None
 
     def save(self, path: str = None) -> bool:
         """This will save the current scene"""
@@ -389,7 +389,7 @@ class FootageItem(AVItem):
     def open_in_viewer(self):
         """Opens the comp in a panel, moves it to the front and gives it focus"""
         kwargs = self._eval_on_this_object('openInViewer()')
-        return Viewer(**kwargs)
+        return Viewer(**kwargs) if kwargs else None
 
     def replace(self, path: str):
         """Changes the source of this Footage Item to the specified file"""
@@ -441,7 +441,7 @@ class FootageSource(PydobeBaseObject):
             value = alpha_dictionary[value]
         self._eval_on_this_object(f'alphaMode = {value}')
 
-    """The effective frame rate as displayed and rendered in compositions by After Effects."""
+    """A frame rate to use instead of the native frame rate value."""
 
     @property
     def conform_frame_rate(self) -> float:
@@ -451,11 +451,39 @@ class FootageSource(PydobeBaseObject):
     def conform_frame_rate(self, value: float):
         self._eval_on_this_object(f'conformFrameRate = "{value}"')
 
+    """The effective frame rate as displayed and rendered in compositions by After Effects."""
+
+    @property
+    def display_frame_rate(self) -> float:
+        return self._eval_on_this_object('displayFrameRate')
+
+    """How the fields are to be separated in non-still footage."""
+    #todo can add dict to make setting easier
+
+    @property
+    def field_separation_type(self) -> int:
+        return self._eval_on_this_object('fieldSeparationType')
+
+    @field_separation_type.setter
+    def field_separation_type(self, value: int):
+        self._eval_on_this_object(f'fieldSeparationType = {value}')
+
     """When true, the footage has an alpha component."""
 
     @property
     def has_alpha(self) -> bool:
         return self._eval_on_this_object('hasAlpha')
+
+    """When true, After Effects performs high-quality field separation."""
+
+    @property
+    def high_quality_field_separation(self) -> bool:
+        return self._eval_on_this_object('highQualityFieldSeparation')
+
+    @high_quality_field_separation.setter
+    def high_quality_field_separation(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f'highQualityFieldSeparation = {extend_value}')
 
     """When true, the footage has an alpha component."""
 
@@ -501,15 +529,72 @@ class FootageSource(PydobeBaseObject):
         colour = format_colour(value)
         self._eval_on_this_object(f'premulColor = {colour}')
 
+    """How the pulldowns are to be removed when field separation is used"""
+    # todo can add dict to make setting easier
+
+    @property
+    def remove_pulldown(self) -> int:
+        return self._eval_on_this_object('removePulldown')
+
+    @remove_pulldown.setter
+    def remove_pulldown(self, value: int):
+        self._eval_on_this_object(f'removePulldown = {value}')
+
+    # FUNCTIONS
+
+    def guess_alpha_mode(self):
+        """Sets alphaMode, premulColor, and invertAlpha to the best estimates for this footage source"""
+        self._eval_on_this_object('guessAlphaMode()')
+
+    def guess_pulldown(self, advance_24p=False):
+        """Sets fieldSeparationType and removePulldown to the best estimates for this footage source."""
+        if advance_24p:
+            self._eval_on_this_object(f'guessPulldown(PulldownMethod.ADVANCE_24P)')
+        else:
+            self._eval_on_this_object(f'guessPulldown(PulldownMethod.PULLDOWN_3_2)')
+
 
 class FileSource(FootageSource):
     def __init__(self, pydobe_id=None, object_type=None):
         super().__init__(pydobe_id, object_type)
 
+    #PROPERTIES
+
+    """The file"""
+
+    @property
+    def file(self):
+        kwargs = self._eval_on_this_object('file')
+        return File(**kwargs) if kwargs else None
+
+    """The path and filename of footage that is missing from this asset."""
+
+    @property
+    def missing_footage_path(self):
+        return self._eval_on_this_object('missingFootagePath')
+
+    # FUNCTIONS
+
+    def reload(self):
+        """Reloads the asset from the file."""
+        return self._eval_on_this_object('reload()')
 
 class SolidSource(FootageSource):
     def __init__(self, pydobe_id=None, object_type=None):
         super().__init__(pydobe_id, object_type)
+
+    # PROPERTIES
+
+    """The color of the solid"""
+
+    @property
+    def colour(self) -> float:
+        return self._eval_on_this_object('color')
+
+    @colour.setter
+    def colour(self, value: list or str):
+        colour = format_colour(value)
+        self._eval_on_this_object(f'color = {colour}')
 
 
 class PlaceHolderSource(FootageSource):
@@ -554,12 +639,12 @@ class ItemCollection(PydobeBaseCollection):
         kwargs = self._eval_on_this_object(
             f'addComp("{name}", {width}, {height}, {aspect_ratio}, {duration}, {frame_rate})'
         )
-        return CompositionItem(**kwargs)
+        return CompositionItem(**kwargs) if kwargs else None
 
     def add_folder(self, name: str) -> object:
         """Add a new Folder to the project"""
         kwargs = self._eval_on_this_object(f'addFolder("{name}")')
-        return FolderItem(**kwargs)
+        return FolderItem(**kwargs) if kwargs else None
 
 
 # MISC
