@@ -155,7 +155,7 @@ class Project(PydobeBaseObject):
             return self._eval_on_this_object("close(CloseOptions.DO_NOT_SAVE_CHANGES)")
 
     def import_file(
-        self, path: str, sequence: bool = False, force_alphabetical: bool = False
+            self, path: str, sequence: bool = False, force_alphabetical: bool = False
     ):
         """This will import a file"""
         import_options = ImportOptions(
@@ -294,6 +294,15 @@ class CompositionItem(AVItem):
     def __init__(self, pydobe_id=None):
         super().__init__(pydobe_id)
 
+    # PROPERTIES
+
+    """All of the layers in the composition"""
+
+    @property
+    def layers(self):
+        kwargs = self._eval_on_this_object('layers')
+        return LayerCollection(**kwargs) if kwargs else None
+
 
 class FolderItem(Item):
     def __init__(self, pydobe_id=None):
@@ -406,13 +415,13 @@ class FootageItem(AVItem):
         self._eval_on_this_object(f"replace({extend_file_object})")
 
     def replace_with_placeholder(
-        self,
-        name: str,
-        width: int,
-        height: int,
-        frame_rate: float,
-        duration: float,
-        duration_as_frames=True,
+            self,
+            name: str,
+            width: int,
+            height: int,
+            frame_rate: float,
+            duration: float,
+            duration_as_frames=True,
     ):
         """Changes the source of this FootageItem to the specified placeholder"""
         if duration_as_frames:
@@ -431,7 +440,7 @@ class FootageItem(AVItem):
         )
 
     def replace_with_solid(
-        self, colour: list, name: str, width: int, height: int, pixel_aspect: float
+            self, colour: list, name: str, width: int, height: int, pixel_aspect: float
     ):
         """Changes the source of this FootageItem to the specified solid"""
         self._eval_on_this_object(
@@ -482,6 +491,7 @@ class FootageSource(PydobeBaseObject):
         return self._eval_on_this_object("displayFrameRate")
 
     """How the fields are to be separated in non-still footage."""
+
     # todo can add dict to make setting easier
 
     @property
@@ -554,6 +564,7 @@ class FootageSource(PydobeBaseObject):
         self._eval_on_this_object(f"premulColor = {colour}")
 
     """How the pulldowns are to be removed when field separation is used"""
+
     # todo can add dict to make setting easier
 
     @property
@@ -627,6 +638,178 @@ class PlaceHolderSource(FootageSource):
         super().__init__(pydobe_id, object_type)
 
 
+# PROPERTIES
+
+class PropertyBase(PydobeBaseObject):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+    # PROPERTIES
+
+    """True if the layer, property, or effect is active
+        Will return False if other layers are solo, or if time is not between layers in and out point"""
+
+    @property
+    def active(self) -> bool:
+        return self._eval_on_this_object('active')
+
+    """True if you can set the enabled attribute value"""
+
+    @property
+    def can_set_enabled(self) -> bool:
+        return self._eval_on_this_object('canSetEnabled')
+
+    """True if the layer, property, or effect is enabled"""
+
+    @property
+    def enabled(self) -> bool:
+        return self._eval_on_this_object('enabled')
+
+    @enabled.setter
+    def enabled(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f'enabled = {extend_value}')
+
+    """When true, this property is an effect property group"""
+
+    @property
+    def is_effect(self) -> bool:
+        return self._eval_on_this_object('isEffect')
+
+    """When true, this property is a mask property group"""
+
+    @property
+    def is_mask(self) -> bool:
+        return self._eval_on_this_object('isMask')
+
+    """When true, this property has been changed since it's creation"""
+
+    @property
+    def is_modified(self) -> bool:
+        return self._eval_on_this_object('isModified')
+
+    """A special name for the property used to build unique naming paths.
+    Every property has a unique match-name identifier."""
+
+    @property
+    def match_name(self) -> bool:
+        return self._eval_on_this_object('matchName')
+
+    """The name of a layer, or the display name of a property"""
+
+    @property
+    def name(self) -> str:
+        return self._eval_on_this_object('name')
+
+    @name.setter
+    def name(self, value: str):
+        self._eval_on_this_object(f'name = "{value}"')
+
+    """The property group that is the parent of this property. Null if this is a layer"""
+
+    @property
+    def parent_property(self) -> object:
+        return self._eval_on_this_object('parentProperty')
+
+    """When true, the property is selected"""
+
+    @property
+    def selected(self) -> bool:
+        return self._eval_on_this_object('selected')
+
+    @selected.setter
+    def selected(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f'selected = {extend_value}')
+
+
+class Property(PropertyBase):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+
+class PropertyGroup(PropertyBase):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+
+# LAYERS
+
+
+class Layer(PropertyGroup):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+    # PROPERTIES
+    @property
+    def type_name(self):
+        return self.match_name.split(" ", 1)[-1]
+
+    """When true, the layer is locked"""
+
+    @property
+    def locked(self) -> bool:
+        return self._eval_on_this_object("locked")
+
+    @locked.setter
+    def locked(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f"locked = {extend_value}")
+
+    """If the layer is shy, it will be hidden when hide shy layers is toggled"""
+
+    @property
+    def shy(self) -> bool:
+        return self._eval_on_this_object("shy")
+
+    @shy.setter
+    def shy(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f"shy = {extend_value}")
+
+    """When true, the layer is soloed"""
+
+    @property
+    def solo(self) -> bool:
+        return self._eval_on_this_object("shy")
+
+    @solo.setter
+    def solo(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_this_object(f"solo = {extend_value}")
+
+    # FUNCTION
+
+    def remove(self):
+        """Remove a layer from a composition"""
+        return self._eval_on_this_object("remove()")
+
+
+class AVLayer(Layer):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+
+class CameraLayer(Layer):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+
+class LightLayer(Layer):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+
+class ShapeLayer(AVLayer):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+
+class TextLayer(AVLayer):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id)
+
+
 # COLLECTIONS
 
 
@@ -650,14 +833,14 @@ class ItemCollection(PydobeBaseCollection):
     # FUNCTIONS
 
     def add_comp(
-        self,
-        name: str,
-        width: int,
-        height: int,
-        aspect_ratio: float,
-        duration: float,
-        frame_rate: float,
-        duration_as_frames=True,
+            self,
+            name: str,
+            width: int,
+            height: int,
+            aspect_ratio: float,
+            duration: float,
+            frame_rate: float,
+            duration_as_frames=True,
     ) -> object:
         """Add a new Composition to the project"""
         if duration_as_frames:
@@ -671,6 +854,111 @@ class ItemCollection(PydobeBaseCollection):
         """Add a new Folder to the project"""
         kwargs = self._eval_on_this_object(f'addFolder("{name}")')
         return FolderItem(**kwargs) if kwargs else None
+
+
+class LayerCollection(PydobeBaseCollection):
+    def __init__(self, pydobe_id=None):
+        super().__init__(pydobe_id, "length")
+
+    def __getitem__(self, index: int):
+        item = None
+        index = index + 1
+        kwargs = super(LayerCollection, self).__getitem__(index)
+        match_name = self._eval_on_this_object(extend_property="matchName", index=index)
+        if match_name == "ADBE AV Layer":
+            item = AVLayer(**kwargs)
+        elif match_name == "ADBE Camera Layer":
+            item = CameraLayer(**kwargs)
+        elif match_name == "ADBE Light Layer":
+            item = LightLayer(**kwargs)
+        elif match_name == "ADBE Vector Layer":
+            item = ShapeLayer(**kwargs)
+        elif match_name == "ADBE Text Layer":
+            item = TextLayer(**kwargs)
+        return item
+
+    def __iter__(self):
+        value = iter([self.__getitem__(i) for i in range(len(self))])
+        return value
+
+    # FUNCTIONS
+
+    def add(self, item: object, duration: float = None) -> object:
+        """Creates a new layer containing a specified Item"""
+        extend_item_object = format_to_extend(item)
+        if duration:
+            kwargs = self._eval_on_this_object(f'add({extend_item_object}, {duration})')
+        else:
+            kwargs = self._eval_on_this_object(f'add({extend_item_object})')
+        object_type = kwargs["object_type"]
+        if object_type == "AVLayer":
+            item = AVLayer(**kwargs)
+        elif object_type == "CameraLayer":
+            item = CameraLayer(**kwargs)
+        elif object_type == "LightLayer":
+            item = LightLayer(**kwargs)
+        elif object_type == "ShapeLayer":
+            item = ShapeLayer(**kwargs)
+        elif object_type == "TextLayer":
+            item = TextLayer(**kwargs)
+        return item
+
+    def add_box_text(self, width: int, height: int) -> object:
+        """Creates a new paragraph text layer"""
+        kwargs = self._eval_on_this_object(f'addBoxText([{width},{height}])')
+        return TextLayer(**kwargs) if kwargs else None
+
+    def add_camera(self, name: str, center_point: list) -> object:
+        """Creates a new camera layer"""
+        kwargs = self._eval_on_this_object(f'addCamera("{name}", {center_point})')
+        return CameraLayer(**kwargs) if kwargs else None
+
+    def add_light(self, name: str, center_point: list):
+        """Creates a new light layer"""
+        kwargs = self._eval_on_this_object(f'addLight("{name}", {center_point})')
+        return LightLayer(**kwargs) if kwargs else None
+
+    def add_null(self, duration: float, duration_as_frames: bool = True) -> object:
+        """Creates a new Null layer"""  # todo frame rate of comp? - how do I get comp from collection?
+        # if duration_as_frames:
+        #     duration = time_to_current_format(duration)
+        kwargs = self._eval_on_this_object(f'addNull({duration})')
+        return AVLayer(**kwargs) if kwargs else None
+
+    def add_shape(self) -> object:
+        """Creates a new Shape layer"""
+        kwargs = self._eval_on_this_object('addShape()')
+        return ShapeLayer(**kwargs) if kwargs else None
+
+    def add_solid(self, colour: list or str, name: str, width: int, height: int, pixel_aspect: float):  # todo
+        """Creates a new Solid layer"""
+        colour = format_colour(colour) # todo fix this for EVERYTHING
+        kwargs = self._eval_on_this_object(f'addSolid({colour}, "{name}", {width}, {height}, {pixel_aspect})')
+        return LightLayer(**kwargs) if kwargs else None
+
+    def add_text(self, source_text: str = ""):
+        """Creates a new Text layer"""
+        kwargs = self._eval_on_this_object(f'addText("{source_text}")')
+        return TextLayer(**kwargs) if kwargs else None
+
+    def by_name(self, name: str):
+        """Returns the first (topmost) layer found in this collection with the specified name,
+        or null if no layer with the given name is found."""
+        kwargs = self._eval_on_this_object(f'byName("{name}")')
+        return TextLayer(**kwargs) if kwargs else None
+
+    def precompose(self, indices: list, name: str, move_attributes: bool = True) -> object:
+        """Creates a new CompItem object and moves the specified layers into its layer collection"""
+        if len(indices) != 1 and not move_attributes:
+            #todo is this error name correct?
+            raise ValueError("Cannot set move_attributes to false when precomposing with more than one layer")
+        indices = [index + 1 for index in indices]
+        if not move_attributes:
+            extend_move_attributes = format_to_extend(move_attributes)
+            kwargs = self._eval_on_this_object(f'precompose({indices}, "{name}", "{extend_move_attributes}")')
+        else:
+            kwargs = self._eval_on_this_object(f'precompose({indices}, "{name}")')
+        return CompositionItem(**kwargs) if kwargs else None
 
 
 # MISC
