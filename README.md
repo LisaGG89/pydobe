@@ -100,7 +100,6 @@ for child in footage_folder.items:
 ### Adding items to a project
 
 ```python
-
 project = pydobe.objects.app.project
 
 # Create some folders
