@@ -31,15 +31,17 @@ field_separation_dictionary = IntStringDict(
 )
 
 pulldown_dictionary = IntStringDict(
-    {5813: "Off",
-     5812: "WSSWW",
-     5814: "SSWWW",
-     5815: "SWWWS",
-     5816: "WWWSS",
-     5817: "WWSSW",
-     5818: "WWWSW",
-     5819: "WWSWW",
-     5820: "WSWWW",
-     5821: "SWWWW",
-     5822: "WWWWS"}
+    {
+        5813: "Off",
+        5812: "WSSWW",
+        5814: "SSWWW",
+        5815: "SWWWS",
+        5816: "WWWSS",
+        5817: "WWSSW",
+        5818: "WWWSW",
+        5819: "WWSWW",
+        5820: "WSWWW",
+        5821: "SWWWW",
+        5822: "WWWWS",
+    }
 )

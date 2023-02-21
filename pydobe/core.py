@@ -14,7 +14,9 @@ class PydobeBaseObject(object):
         self.pydobe_id = pydobe_id
         self.object_type = object_type
 
-    def _eval_on_object(self, extend_property: str = "", pydobe_id: str = None, index: int = None):
+    def _eval_on_object(
+        self, extend_property: str = "", pydobe_id: str = None, index: int = None
+    ):
         """Query property or execute function on ExtendScript object"""
         if extend_property:
             extend_property = f".{extend_property}"
@@ -89,7 +91,9 @@ def eval_script_returning_object(line: str):
             data_list = convert_to_list(line)
             return data_list
         else:
-            kwargs = dict(pydobe_id=result["pydobeId"], object_type=result["objectType"])
+            kwargs = dict(
+                pydobe_id=result["pydobeId"], object_type=result["objectType"]
+            )
         return kwargs
     return result
 
