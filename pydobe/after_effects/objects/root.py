@@ -1,4 +1,4 @@
-from pydobe.after_effects.objects.ae_objects import *
+from pydobe.after_effects.objects.ae_objects import Application
 from pydobe.core import eval_script_returning_object, is_port_open
 
 
