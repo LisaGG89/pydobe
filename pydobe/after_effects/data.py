@@ -25,3 +25,21 @@ label_dictionary = IntStringDict(
 alpha_dictionary = IntStringDict(
     {5413: "Ignore", 5412: "Straight", 5414: "Premultiplied"}
 )
+
+field_separation_dictionary = IntStringDict(
+    {5613: "Off", 5612: "Upper Field First", 5614: "Lower Field First"}
+)
+
+pulldown_dictionary = IntStringDict(
+    {5813: "Off",
+     5812: "WSSWW",
+     5814: "SSWWW",
+     5815: "SWWWS",
+     5816: "WWWSS",
+     5817: "WWSSW",
+     5818: "WWWSW",
+     5819: "WWSWW",
+     5820: "WSWWW",
+     5821: "SWWWW",
+     5822: "WWWWS"}
+)
