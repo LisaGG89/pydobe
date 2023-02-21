@@ -10,43 +10,49 @@ PANEL_URL = f"http://{HOST}:{PORT}"
 class PydobeBaseObject(object):
     """Base object for every mirror object from ExtendScript"""
 
-    def __init__(self, pydobe_id: str):
+    def __init__(self, pydobe_id: str, object_type: str):
         self.pydobe_id = pydobe_id
+        self.object_type = object_type
 
-    def _eval_on_this_object(self, extend_property: str = "", index: int = None):
+    def _eval_on_object(self, extend_property: str = "", pydobe_id: str = None, index: int = None):
         """Query property or execute function on ExtendScript object"""
-
         if extend_property:
             extend_property = f".{extend_property}"
         if index:
             index = f"[{index}]"
         else:
             index = ""
-        line = f"$._pydobe['{self.pydobe_id}']{index}{extend_property};"
+        if pydobe_id:
+            line = f"$._pydobe['{pydobe_id}']{index}{extend_property};"
+        else:
+            line = f"$._pydobe['{self.pydobe_id}']{index}{extend_property};"
         result = eval_script_returning_object(line)
         return result
 
+    def _execute_command(self, code: str):
+        eval_script(code)
+
 
 class PydobeBaseCollection(PydobeBaseObject):
-    def __init__(self, pydobe_id: str, len_property: str):
+    def __init__(self, pydobe_id: str, object_type: str, len_property: str):
         """Base Object for collections"""
 
         if pydobe_id is None:
             raise ValueError("Creating a collection from scratch is not supported")
         self.len_property = len_property
-        super(PydobeBaseCollection, self).__init__(pydobe_id)
+        super(PydobeBaseCollection, self).__init__(pydobe_id, object_type)
 
     def __getitem__(self, index: int) -> dict:
         """Builtin method for getting the value at the specific index"""
 
         if index < 0:
             index = str(self.__len__() + index)
-        return self._eval_on_this_object(index=index)
+        return self._eval_on_object(index=index)
 
     def __len__(self) -> int:
         """Builtin method for length"""
 
-        return int(self._eval_on_this_object(self.len_property))
+        return int(self._eval_on_object(self.len_property))
 
     def __iter__(self):
         """Builtin method for iterating through items"""
@@ -79,15 +85,11 @@ def eval_script_returning_object(line: str):
     result = eval_script(script)
     # Extract pydobe ID if object is returned
     if isinstance(result, dict) and result.get("isObject"):
-        if result["objectType"].endswith("Source"):
-            kwargs = dict(
-                pydobe_id=result["pydobeId"], object_type=result["objectType"]
-            )
-        elif result["objectType"] == "Array" and "=" not in line:
+        if result["objectType"] == "Array" and "=" not in line:
             data_list = convert_to_list(line)
             return data_list
         else:
-            kwargs = dict(pydobe_id=result["pydobeId"])
+            kwargs = dict(pydobe_id=result["pydobeId"], object_type=result["objectType"])
         return kwargs
     return result
 
