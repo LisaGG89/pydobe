@@ -15,7 +15,7 @@ class PydobeBaseObject(object):
         self.object_type = object_type
 
     def _eval_on_object(
-            self, extend_property: str = "", pydobe_id: str = None, index: int = None
+        self, extend_property: str = "", pydobe_id: str = None, index: int = None
     ):
         """Query property or execute function on ExtendScript object"""
         if extend_property:
@@ -106,8 +106,8 @@ def eval_script(code: str):
         PANEL_URL,
         json={
             "to_eval": "try{\n"
-                       + code
-                       + "\n}catch(e){e.error=true;ExtendJSON.stringify(e)}"
+            + code
+            + "\n}catch(e){e.error=true;ExtendJSON.stringify(e)}"
         },
     )
 
@@ -156,4 +156,3 @@ def get_all_subclasses(cls):
         all_subclasses.append(subclass)
         all_subclasses.extend(get_all_subclasses(subclass))
     return all_subclasses
-
