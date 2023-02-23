@@ -1,7 +1,8 @@
 from __future__ import annotations
-from typing import List
-from pydobe.core import PydobeBaseObject, PydobeBaseCollection, format_to_extend
-from pydobe.adobe_objects import File
+
+import pydobe
+from pydobe.core import PydobeBaseObject, PydobeBaseCollection, format_to_extend, create_python_object
+from pydobe.adobe_objects import File, Folder
 from pydobe.utils import hex_to_rgb
 from pydobe.after_effects.data import *
 from pydobe.after_effects.ae_utils import *
@@ -15,6 +16,12 @@ class Application(PydobeBaseObject):
         super().__init__(pydobe_id, object_type)
 
     # PROPERTIES
+
+    """Available GPU Acceleration types for the current viewer"""
+
+    @property
+    def available_gpu_accel_types(self) -> list[int]:
+        return self._eval_on_object("availableGPUAccelTypes")
 
     """ This is the current active project. """
 
@@ -64,18 +71,36 @@ class Project(PydobeBaseObject):
 
     @property
     def active_item(self) -> Item:
-        item = None
         kwargs = self._eval_on_object("activeItem")
         if not kwargs:
             raise TypeError("'active_item' requires precisely one item to be selected")
-        type_name = self._eval_on_object("activeItem.typeName")
-        if type_name == "Composition":
-            item = CompositionItem(**kwargs)
-        elif type_name == "Footage":
-            item = FootageItem(**kwargs)
-        elif type_name == "Folder":
-            item = FolderItem(**kwargs)
+        object_type = kwargs["object_type"]
+        item = create_python_object(object_type)(**kwargs)
         return item
+
+    """The color depth of the project, either 8, 16, or 32 bit"""
+
+    @property
+    def bits_per_channel(self) -> int:
+        return self._eval_on_object('bitsPerChannel')
+
+    @bits_per_channel.setter
+    def bits_per_channel(self, value: int):
+        if value not in [8, 16, 32]:
+            raise ValueError("Unable to set 'bits_per_channel', value must be 8, 16, or 32")
+        else:
+            self._eval_on_object(f'bitsPerChannel = {value}')
+
+    """Compensate for scene referred profiles"""
+
+    @property
+    def compensate_for_scene_referred_profiles(self) -> bool:
+        return self._eval_on_object("compensateForSceneReferredProfiles")
+
+    @compensate_for_scene_referred_profiles.setter
+    def compensate_for_scene_referred_profiles(self, value):
+        extend_value = format_to_extend(value)
+        self._eval_on_object(f"compensateForSceneReferredProfiles = {extend_value}")
 
     """Returns True if file has been modified since last save. False if it has not"""
 
@@ -83,12 +108,97 @@ class Project(PydobeBaseObject):
     def dirty(self) -> bool:
         return self._eval_on_object("dirty")
 
-    """Identifies the file object containing the project"""
+    """Alternate way to set Frame count menu setting"""
+
+    @property
+    def display_start_frame(self) -> int:
+        return self._eval_on_object("displayStartFrame")
+
+    @display_start_frame.setter
+    def display_start_frame(self, value: int):
+        if value > 1:
+            raise ValueError("Display start frame must be set to either 0 or 1")
+        self._eval_on_object(f'displayStartFrame = {value}')
+
+    """The expression engine setting in the Project Settings dialog box"""
+
+    @property
+    def expression_engine(self) -> str:
+        return self._eval_on_object("expressionEngine")
+
+    @expression_engine.setter
+    def expression_engine(self, value: str):
+        if value != "javascript-1.0" and value != "extendscript":
+            raise ValueError("No engine exists by this name")
+        self._eval_on_object(f'expressionEngine = "{value}"')
+
+    """The Use Feet + Frames menu setting"""
+
+    @property
+    def feet_frames_film_type(self) -> int:
+        return self._eval_on_object("feetFramesFilmType")
+
+    @feet_frames_film_type.setter
+    def feet_frames_film_type(self, value: int):
+        if type(value) == str:
+            value = use_feet_and_frames_dictionary[value]
+        self._eval_on_object(f"feetFramesFilmType = {value}")
+
+    """"Identifies the file object containing the project"""
 
     @property
     def file(self) -> File:
         kwargs = self._eval_on_object("file")
         return File(**kwargs) if kwargs else None
+
+    """The footage start type menu setting"""
+
+    @property
+    def footage_timecode_display_start_type(self) -> int:
+        return self._eval_on_object("footageTimecodeDisplayStartType")
+
+    @footage_timecode_display_start_type.setter
+    def footage_timecode_display_start_type(self, value: int):
+        if type(value) == str:
+            value = footage_start_time_dictionary[value]
+        self._eval_on_object(f"footageTimecodeDisplayStartType = {value}")
+
+    """The frame count menu setting"""
+
+    @property
+    def frames_count_type(self) -> int:
+        return self._eval_on_object("framesCountType")
+
+    @frames_count_type.setter
+    def frames_count_type(self, value: int):
+        if type(value) == str:
+            value = frames_count_dictionary[value]
+        self._eval_on_object(f"framesCountType = {value}")
+
+    """The Use Feet + Frames menu setting - 16mm or 35mm"""
+
+    @property
+    def frames_use_feet_frames(self) -> bool:
+        return self._eval_on_object("framesUseFeetFrames")
+
+    @frames_use_feet_frames.setter
+    def frames_use_feet_frames(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_object(f"framesUseFeetFrames = {extend_value}")
+
+    """The frame count menu setting"""
+
+    @property
+    def gpu_accel_type(self) -> int:
+        return self._eval_on_object("gpuAccelType")
+
+    @gpu_accel_type.setter
+    def gpu_accel_type(self, value: int):
+        if type(value) == str:
+            value = gpu_accel_type_dictionary[value]
+        if value not in pydobe.objects.app.available_gpu_accel_types:
+            raise ValueError("This GPU Acceleration is not available")
+        self._eval_on_object(f"gpuAccelType = {value}")
 
     """All of the items in the project"""
 
@@ -97,11 +207,46 @@ class Project(PydobeBaseObject):
         kwargs = self._eval_on_object("items")
         return ItemCollection(**kwargs) if kwargs else None
 
+    """True if linear blending should be enabled for this project"""
+
+    @property
+    def linear_blending(self) -> bool:
+        return self._eval_on_object("linearBlending")
+
+    @linear_blending.setter
+    def linear_blending(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_object(f"linearBlending = {extend_value}")
+
+    """True if linearize working space should be enabled for this project"""
+
+    @property
+    def linearize_working_space(self) -> bool:
+        return self._eval_on_object("linearizeWorkingSpace")
+
+    @linearize_working_space.setter
+    def linearize_working_space(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_object(f"linearizeWorkingSpace = {extend_value}")
+
     """The number of items within the project"""
 
     @property
     def num_items(self) -> int:
         return self._eval_on_object("numItems")
+
+    """The render queue of the project."""
+
+    @property
+    def render_queue(self) -> RenderQueue:
+        kwargs = self._eval_on_object("renderQueue")
+        return RenderQueue(**kwargs) if kwargs else None
+
+    """The current revision of the project"""
+
+    @property
+    def revision(self) -> int:
+        return self._eval_on_object("revision")
 
     """The root folder containing the contents of the project
     Items inside internal folders will not be shown"""
@@ -111,6 +256,91 @@ class Project(PydobeBaseObject):
         kwargs = self._eval_on_object("rootFolder")
         return FolderItem(**kwargs) if kwargs else None
 
+    "All items selected in the Project Panel"
+
+    @property
+    def selection(self) -> list[Item]:
+        item_list = []
+        kwargs_list = self._eval_on_object("selection")
+        for kwargs in kwargs_list:
+            object_type = kwargs["object_type"]
+            item = create_python_object(object_type)(**kwargs)
+            item_list.append(item)
+        return item_list
+
+    """The time display style"""
+
+    @property
+    def time_display_type(self) -> int:
+        return self._eval_on_object("timeDisplayType")
+
+    @time_display_type.setter
+    def time_display_type(self, value: int or str):
+        if type(value) == str:
+            value = time_display_dictionary[value.title()]
+        self._eval_on_object(f"timeDisplayType = {value}")
+
+    """The active tool in the tools panel"""
+
+    # todo big ass dictionary
+    @property
+    def tool_type(self) -> int:
+        return self._eval_on_object("toolType")
+
+    @tool_type.setter
+    def tool_type(self, value: int or str):
+        if type(value) == str:
+            pass
+            # value = use_feet_and_frames_dictionary[value]
+        self._eval_on_object(f"toolType = {value}")
+
+    """When true, thumbnail views use the transparency checkerboard pattern."""
+
+    @property
+    def transparency_grid_thumbnails(self) -> bool:
+        return self._eval_on_object("transparencyGridThumbnails")
+
+    @transparency_grid_thumbnails.setter
+    def transparency_grid_thumbnails(self, value: bool):
+        extend_value = format_to_extend(value)
+        self._eval_on_object(f"transparencyGridThumbnails = {extend_value}")
+
+    """Working gamma value. Only used when color working space is set to none"""
+
+    @property
+    def working_gamma(self) -> float:
+        return self._eval_on_object('workingGamma')
+
+    @working_gamma.setter
+    def working_gamma(self, value: float):
+        if value not in [2.2, 2.4]:
+            raise ValueError("Unable to set 'working_gamma', value must be 2.2 or 2.4")
+        else:
+            self._eval_on_object(f'workingGamma = "{value}"')
+
+    """Color profile description"""
+
+    @property
+    def working_space(self) -> str:
+        return self._eval_on_object('workingSpace')
+
+    @working_space.setter
+    def working_space(self, value: str):
+        if value in self.list_color_profiles():
+            self._eval_on_object(f'workingSpace = "{value}"')
+        else:
+            raise ValueError("Unable to set 'workingSpace', value must be an accepted color profile")
+
+    """The project’s XMP metadata, stored as RDF (XML-based)"""
+
+    @property
+    def xmp_packet(self) -> str:
+        return self._eval_on_object('xmpPacket')
+
+    @xmp_packet.setter
+    def xmp_packet(self, value: str):
+        self._eval_on_object(f'xmpPacket = "{value}"')
+
     # CUSTOM PROPERTIES
 
     """All of the composition items within the project"""
@@ -119,7 +349,7 @@ class Project(PydobeBaseObject):
     def compositions(self) -> list:
         composition_items = []
         for item in self.items:
-            if item.type_name == "Composition":
+            if item.object_type == "CompItem":
                 composition_items.append(item)
         return composition_items
 
@@ -129,7 +359,7 @@ class Project(PydobeBaseObject):
     def footages(self) -> list:
         footage_items = []
         for item in self.items:
-            if item.type_name == "Footage":
+            if item.object_type == "FootageItem":
                 footage_items.append(item)
         return footage_items
 
@@ -139,11 +369,15 @@ class Project(PydobeBaseObject):
     def folders(self) -> list:
         folder_items = []
         for item in self.items:
-            if item.type_name == "Folder":
+            if item.object_type == "FolderItem":
                 folder_items.append(item)
         return folder_items
 
     # FUNCTIONS
+
+    def auto_fix_expressions(self, old_text, new_text):
+        """Automatically replaces text found in broken expressions in the project"""
+        self._eval_on_object(f'autoFixExpressions("{old_text}", "{new_text})')
 
     def close(self, save: bool = None) -> bool:
         """This will close the current project with an option to save changes or not"""
@@ -154,8 +388,12 @@ class Project(PydobeBaseObject):
         else:
             return self._eval_on_object("close(CloseOptions.DO_NOT_SAVE_CHANGES)")
 
+    def consolidate_footage(self) -> int:
+        """Consolidates all footage in the project, returns total number of footage items removed"""
+        return self._eval_on_object("consolidateFootage()")
+
     def import_file(
-        self, path: str, sequence: bool = False, force_alphabetical: bool = False
+            self, path: str, sequence: bool = False, force_alphabetical: bool = False
     ):
         """This will import a file"""
         import_options = ImportOptions(
@@ -168,6 +406,54 @@ class Project(PydobeBaseObject):
         extend_import_options = format_to_extend(import_options)
         kwargs = self._eval_on_object(f"importFile({extend_import_options})")
         return FootageItem(**kwargs) if kwargs else None
+
+    def import_file_with_dialog(self) -> list:
+        """Shows an import file dialog box"""
+        return self._eval_on_object("importFileWithDialog()")
+
+    def import_placeholder(self, name: str, width: int, height: int, frame_rate: float, duration: float or str, duration_in_current_format: bool = True ) -> object:
+        """Shows an import file dialog box"""
+        if duration_in_current_format:
+            duration = time_to_current_format(duration, frame_rate)
+        kwargs = self._eval_on_object(f'importPlaceholder("{name}", {width}, {height}, {frame_rate}, {duration})')
+        return FootageItem(**kwargs) if kwargs else None
+
+    def item(self, index: int) -> object:
+        """Retrieves an item at a specified index position"""
+        index = index + 1
+        kwargs = self._eval_on_object(f'item({index})')
+        object_type = kwargs["object_type"]
+        item = create_python_object(object_type)(**kwargs)
+        return item
+
+    def item_by_id(self, item_id: int) -> Item:
+        """Retrieves an item by its ID"""
+        kwargs = self._eval_on_object(f'itemByID({item_id})')
+        object_type = kwargs["object_type"]
+        item = create_python_object(object_type)(**kwargs)
+        return item
+
+    def layer_by_id(self, layer_id: int) -> Layer:
+        """Retrieves a layer by its ID"""
+        kwargs = self._eval_on_object(f'layerByID({layer_id})')
+        object_type = kwargs["object_type"]
+        layer = create_python_object(object_type)(**kwargs)
+        return layer
+
+    def reduce_project(self, items: list[Item]) -> int:
+        """Removes all items from the project except those specified"""
+        extend_items = format_to_extend(items)
+        return self._eval_on_object(f'reduceProject({extend_items})')
+
+    def remove_unused_footage(self) -> int:
+        """Removes unused footage from the project"""
+        return self._eval_on_object(f'removeUnusedFootage()')
+
+    def set_default_import_folder(self, path: str) -> bool:
+        """Sets the folder that will be shown in the file import dialog"""
+        folder = Folder(**eval_script_returning_object(f'Folder("{path}")'))
+        extend_folder = format_to_extend(folder)
+        return self._eval_on_object(f"setDefaultImportFolder({extend_folder})")
 
     def save(self, path: str = None) -> bool:
         """This will save the current scene"""
@@ -182,6 +468,15 @@ class Project(PydobeBaseObject):
         """This will prompt the user to save with a dialog box"""
         return self._eval_on_object("saveWithDialog()")
 
+    def show_window(self, show: bool):
+        """Shows or hides the Project panel."""
+        extend_show = format_to_extend(show)
+        return self._eval_on_object(f"showWindow({extend_show})")
+
+    def list_color_profiles(self) -> list[list]:
+        """List of available color profile descriptions"""
+        return self._eval_on_object(f"listColorProfiles()")
+
     # CUSTOM FUNCTIONS
 
     def item_by_name(self, name: str) -> Item:
@@ -192,7 +487,7 @@ class Project(PydobeBaseObject):
         raise LookupError("There is no item by this name in your project")
 
     def save_incremental(self):
-        """Save inc"""
+        """Save incremental"""
         self._execute_command("app.executeCommand(3088)")
 
 
@@ -236,7 +531,7 @@ class Item(PydobeBaseObject):
     def id(self) -> int:
         return self._eval_on_object("id")
 
-    """The colour of the label assigned to the item, expressed as an integer between 1-16. 0 = none"""
+    """The color of the label assigned to the item, expressed as an integer between 1-16. 0 = none"""
 
     @property
     def label(self) -> int:
@@ -251,7 +546,7 @@ class Item(PydobeBaseObject):
         else:
             if not label_dictionary.get(value.title()):
                 raise ValueError(
-                    "Cannot set label, value is not an available label colour"
+                    "Cannot set label, value is not an available label color"
                 )
             int_value = label_dictionary[value.title()]
         self._eval_on_object(f"label = {int_value};")
@@ -275,7 +570,7 @@ class Item(PydobeBaseObject):
 
     @parent_folder.setter
     def parent_folder(self, value: FolderItem):
-        if value.type_name == "Folder":
+        if value.object_type == "FolderItem":
             extend_value = format_to_extend(value)
             self._eval_on_object(f"parentFolder = {extend_value}")
         else:
@@ -429,7 +724,7 @@ class AVItem(Item):
         comp_list = []
         kwargs_list = self._eval_on_object("usedIn")
         for kwargs in kwargs_list:
-            comp = CompositionItem(**kwargs)
+            comp = CompItem(**kwargs)
             comp_list.append(comp)
         return comp_list
 
@@ -457,20 +752,20 @@ class AVItem(Item):
     # CUSTOM PROPERTIES
 
     @property
-    def time_in_current_format(self) -> float:
+    def time_in_current_format(self) -> str:
         return time_to_current_format(self.time, self.frame_rate)
 
     @time_in_current_format.setter
-    def time_in_current_format(self, value: float):
+    def time_in_current_format(self, value: str):
         value = current_format_to_time(value, self.frame_rate)
         self._eval_on_object(f'time = "{value}"')
 
     @property
-    def duration_in_current_format(self) -> float:
+    def duration_in_current_format(self) -> str:
         return time_to_current_format(self.duration, self.frame_rate)
 
     @duration_in_current_format.setter
-    def duration_in_current_format(self, value: float):
+    def duration_in_current_format(self, value: str):
         value = current_format_to_time(value, self.frame_rate)
         self._eval_on_object(f'duration = "{value}"')
 
@@ -486,8 +781,8 @@ class AVItem(Item):
         """Removes the proxy from this AVItem"""
         self._eval_on_object("setProxyToNone()")
 
-    def set_proxy_with_place_holder(
-        self, name: str, width: int, height: int, frame_rate: int, duration: float
+    def set_proxy_with_placeholder(
+            self, name: str, width: int, height: int, frame_rate: int, duration: float
     ):
         """Creates a PlaceholderSource object with specified values, sets this as the value of the proxySource
         attribute"""
@@ -505,15 +800,15 @@ class AVItem(Item):
         )
 
     def set_proxy_with_solid(
-        self, colour: list, name: str, width: int, height: int, pixel_aspect: float
+            self, color: list, name: str, width: int, height: int, pixel_aspect: float
     ):
         """Creates a SolidSource object with specified values, sets this as the value of the proxySource attribute"""
         self._eval_on_object(
-            f'setProxyWithSolid({colour}, "{name}", {width}, {height}, {pixel_aspect})'
+            f'setProxyWithSolid({color}, "{name}", {width}, {height}, {pixel_aspect})'
         )
 
 
-class CompositionItem(AVItem):
+class CompItem(AVItem):
     def __init__(self, pydobe_id=None, object_type=None):
         super().__init__(pydobe_id, object_type)
 
@@ -526,17 +821,17 @@ class CompositionItem(AVItem):
         kwargs = self._eval_on_object("activeCamera")
         return CameraLayer(**kwargs)
 
-    """The background Colour of the composition"""
+    """The background color of the composition"""
 
     @property
-    def bg_colour(self):
+    def bg_color(self):
         return self._eval_on_object("bgColor")
 
-    @bg_colour.setter
-    def bg_colour(self, value: list or str):
+    @bg_color.setter
+    def bg_color(self, value: list or str):
         if type(value) == str:
-            colour = hex_to_rgb(value)
-        self._eval_on_object(f"bgColor = {colour}")
+            value = hex_to_rgb(value)
+        self._eval_on_object(f"bgColor = {value}")
 
     """The time set as the beginning of the composition in frames"""
 
@@ -731,11 +1026,11 @@ class CompositionItem(AVItem):
     """The x and y downsample resolution factors for rendering the composition."""
 
     @property
-    def resolution_factor(self) -> List[int]:
+    def resolution_factor(self) -> list[int]:
         return self._eval_on_object("resolutionFactor")
 
     @resolution_factor.setter
-    def resolution_factor(self, value: List[int]):
+    def resolution_factor(self, value: list[int]):
         self._eval_on_object(f"resolutionFactor = {value}")
 
     """All of the selected layers in this composition."""
@@ -746,17 +1041,7 @@ class CompositionItem(AVItem):
         kwargs_list = self._eval_on_object("selectedLayers")
         for kwargs in kwargs_list:
             object_type = kwargs["object_type"]
-            layer = None
-            if object_type == "AVLayer":
-                layer = AVLayer(**kwargs)
-            elif object_type == "CameraLayer":
-                layer = CameraLayer(**kwargs)
-            elif object_type == "LightLayer":
-                layer = LightLayer(**kwargs)
-            elif object_type == "ShapeLayer":
-                layer = ShapeLayer(**kwargs)
-            elif object_type == "TextLayer":
-                layer = TextLayer(**kwargs)
+            layer = create_python_object(object_type)(**kwargs)
             layer_list.append(layer)
         return layer_list
 
@@ -850,7 +1135,7 @@ class CompositionItem(AVItem):
     # FUNCTIONS
 
     def export_as_motion_graphics_template(
-        self, overwrite: bool = True, path: str = None
+            self, overwrite: bool = True, path: str = None
     ) -> bool:
         """Exports the composition as a Motion Graphics template."""
         extend_overwrite = format_to_extend(overwrite)
@@ -890,16 +1175,7 @@ class CompositionItem(AVItem):
                 layer += 1
                 kwargs = self._eval_on_object(f"layer({layer})")
         object_type = kwargs["object_type"]
-        if object_type == "AVLayer":
-            layer = AVLayer(**kwargs)
-        elif object_type == "CameraLayer":
-            layer = CameraLayer(**kwargs)
-        elif object_type == "LightLayer":
-            layer = LightLayer(**kwargs)
-        elif object_type == "ShapeLayer":
-            layer = ShapeLayer(**kwargs)
-        elif object_type == "TextLayer":
-            layer = TextLayer(**kwargs)
+        layer = create_python_object(object_type)(**kwargs)
         return layer
 
     def open_in_essential_graphics(self):
@@ -939,7 +1215,7 @@ class FolderItem(Item):
     def compositions(self) -> list:
         composition_items = []
         for item in self.items:
-            if item.type_name == "Composition":
+            if item.object_type == "CompItem":
                 composition_items.append(item)
         return composition_items
 
@@ -949,7 +1225,7 @@ class FolderItem(Item):
     def footages(self) -> list:
         footage_items = []
         for item in self.items:
-            if item.type_name == "Footage":
+            if item.object_type == "FootageItem":
                 footage_items.append(item)
         return footage_items
 
@@ -959,7 +1235,7 @@ class FolderItem(Item):
     def folders(self) -> list:
         folder_items = []
         for item in self.items:
-            if item.type_name == "Folder":
+            if item.object_type == "FolderItem":
                 folder_items.append(item)
         return folder_items
 
@@ -967,16 +1243,10 @@ class FolderItem(Item):
 
     def item(self, sub_index: int) -> Item:
         """Returns the top-level item in this folder at the specified index position."""
-        item = None
         sub_index += 1
         kwargs = self._eval_on_object(f"item({sub_index})")
-        type_name = self._eval_on_object(f"item({sub_index}).typeName")
-        if type_name == "Composition":
-            item = CompositionItem(**kwargs)
-        if type_name == "Footage":
-            item = FootageItem(**kwargs)
-        elif type_name == "Folder":
-            item = FolderItem(**kwargs)
+        object_type = kwargs["object_type"]
+        item = create_python_object(object_type)(**kwargs)
         return item
 
 
@@ -991,16 +1261,10 @@ class FootageItem(AVItem):
 
     @property
     def main_source(self) -> FootageSource:
-        item = None
         kwargs = self._eval_on_object("mainSource")
         object_type = kwargs["object_type"]
-        if object_type == "FileSource":
-            item = FileSource(**kwargs)
-        elif object_type == "SolidSource":
-            item = SolidSource(**kwargs)
-        elif object_type == "PlaceholderSource":
-            item = PlaceholderSource(**kwargs)
-        return item
+        source = create_python_object(object_type)(**kwargs)
+        return source
 
     """The file object associated with this footage"""
 
@@ -1057,16 +1321,16 @@ class FootageItem(AVItem):
         self._eval_on_object(f"replace({extend_file_object})")
 
     def replace_with_placeholder(
-        self,
-        name: str,
-        width: int,
-        height: int,
-        frame_rate: float,
-        duration: float,
-        duration_as_frames=True,
+            self,
+            name: str,
+            width: int,
+            height: int,
+            frame_rate: float,
+            duration: float,
+            duration_in_current_format=True,
     ):
         """Changes the source of this FootageItem to the specified placeholder"""
-        if duration_as_frames:
+        if duration_in_current_format:
             duration = current_format_to_time(duration, frame_rate)
         self._eval_on_object(
             f'replaceWithPlaceholder("{name}", {width}, {height}, {frame_rate}, {duration})'
@@ -1082,11 +1346,11 @@ class FootageItem(AVItem):
         )
 
     def replace_with_solid(
-        self, colour: list, name: str, width: int, height: int, pixel_aspect: float
+            self, color: list, name: str, width: int, height: int, pixel_aspect: float
     ):
         """Changes the source of this FootageItem to the specified solid"""
         self._eval_on_object(
-            f'replaceWithSolid({colour},"{name}", {width}, {height}, {pixel_aspect})'
+            f'replaceWithSolid({color},"{name}", {width}, {height}, {pixel_aspect})'
         )
 
 
@@ -1192,14 +1456,14 @@ class FootageSource(PydobeBaseObject):
     """The color to be premultiplied."""
 
     @property
-    def premul_colour(self) -> int:
+    def premul_color(self) -> int:
         return self._eval_on_object("premulColor")
 
-    @premul_colour.setter
-    def premul_colour(self, value: list or str):
+    @premul_color.setter
+    def premul_color(self, value: list or str):
         if type(value) == str:
-            colour = hex_to_rgb(value)
-        self._eval_on_object(f"premulColor = {colour}")
+            value = hex_to_rgb(value)
+        self._eval_on_object(f"premulColor = {value}")
 
     """How the pulldowns are to be removed when field separation is used"""
 
@@ -1262,14 +1526,14 @@ class SolidSource(FootageSource):
     """The color of the solid"""
 
     @property
-    def colour(self) -> float:
+    def color(self) -> float:
         return self._eval_on_object("color")
 
-    @colour.setter
-    def colour(self, value: list or str):
+    @color.setter
+    def color(self, value: list or str):
         if type(value) == str:
-            colour = hex_to_rgb(value)
-        self._eval_on_object(f"color = {colour}")
+            value = hex_to_rgb(value)
+        self._eval_on_object(f"color = {value}")
 
 
 class PlaceholderSource(FootageSource):
@@ -1386,9 +1650,9 @@ class Layer(PropertyGroup):
     """The composition that contains this Layer"""
 
     @property
-    def containing_comp(self) -> CompositionItem:
+    def containing_comp(self) -> CompItem:
         kwargs = self._eval_on_object("containingComp")
-        return CompositionItem(**kwargs) if kwargs else None
+        return CompItem(**kwargs) if kwargs else None
 
     """When true, the layer is locked"""
 
@@ -1455,6 +1719,13 @@ class TextLayer(AVLayer):
         super().__init__(pydobe_id, object_type)
 
 
+# RENDER
+
+class RenderQueue(PydobeBaseObject):
+    def __init__(self, pydobe_id=None, object_type=None):
+        super().__init__(pydobe_id, object_type)
+
+
 # COLLECTIONS
 
 
@@ -1463,37 +1734,31 @@ class ItemCollection(PydobeBaseCollection):
         super().__init__(pydobe_id, object_type, "length")
 
     def __getitem__(self, index: int):
-        item = None
         index = index + 1
         kwargs = super(ItemCollection, self).__getitem__(index)
-        type_name = self._eval_on_object(extend_property="typeName", index=index)
-        if type_name == "Composition":
-            item = CompositionItem(**kwargs)
-        if type_name == "Footage":
-            item = FootageItem(**kwargs)
-        elif type_name == "Folder":
-            item = FolderItem(**kwargs)
+        object_type = kwargs["object_type"]
+        item = create_python_object(object_type)(**kwargs)
         return item
 
     # FUNCTIONS
 
     def add_comp(
-        self,
-        name: str,
-        width: int,
-        height: int,
-        aspect_ratio: float,
-        duration: float,
-        frame_rate: float,
-        duration_as_frames=True,
-    ) -> CompositionItem:
+            self,
+            name: str,
+            width: int,
+            height: int,
+            aspect_ratio: float,
+            duration: float or str,
+            frame_rate: float,
+            duration_in_current_format=True,
+    ) -> CompItem:
         """Add a new Composition to the project"""
-        if duration_as_frames:
+        if duration_in_current_format:
             duration = current_format_to_time(duration, frame_rate)
         kwargs = self._eval_on_object(
             f'addComp("{name}", {width}, {height}, {aspect_ratio}, {duration}, {frame_rate})'
         )
-        return CompositionItem(**kwargs) if kwargs else None
+        return CompItem(**kwargs) if kwargs else None
 
     def add_folder(self, name: str) -> FolderItem:
         """Add a new Folder to the project"""
@@ -1506,21 +1771,11 @@ class LayerCollection(PydobeBaseCollection):
         super().__init__(pydobe_id, object_type, "length")
 
     def __getitem__(self, index: int):
-        layer = None
         index = index + 1
         kwargs = super(LayerCollection, self).__getitem__(index)
         print(kwargs)
         object_type = kwargs["object_type"]
-        if object_type == "AVLayer":
-            layer = AVLayer(**kwargs)
-        elif object_type == "CameraLayer":
-            layer = CameraLayer(**kwargs)
-        elif object_type == "LightLayer":
-            layer = LightLayer(**kwargs)
-        elif object_type == "ShapeLayer":
-            layer = ShapeLayer(**kwargs)
-        elif object_type == "TextLayer":
-            layer = TextLayer(**kwargs)
+        layer = create_python_object(object_type)(**kwargs)
         return layer
 
     def __iter__(self):
@@ -1531,23 +1786,14 @@ class LayerCollection(PydobeBaseCollection):
 
     def add(self, item: Item, duration: float = None) -> Layer:
         """Creates a new layer containing a specified Item"""
-        layer = None
         extend_item_object = format_to_extend(item)
+        print(extend_item_object)
         if duration:
             kwargs = self._eval_on_object(f"add({extend_item_object}, {duration})")
         else:
             kwargs = self._eval_on_object(f"add({extend_item_object})")
         object_type = kwargs["object_type"]
-        if object_type == "AVLayer":
-            layer = AVLayer(**kwargs)
-        elif object_type == "CameraLayer":
-            layer = CameraLayer(**kwargs)
-        elif object_type == "LightLayer":
-            layer = LightLayer(**kwargs)
-        elif object_type == "ShapeLayer":
-            layer = ShapeLayer(**kwargs)
-        elif object_type == "TextLayer":
-            layer = TextLayer(**kwargs)
+        layer = create_python_object(object_type)(**kwargs)
         return layer
 
     def add_box_text(self, width: int, height: int) -> TextLayer:
@@ -1566,7 +1812,7 @@ class LayerCollection(PydobeBaseCollection):
         return LightLayer(**kwargs) if kwargs else None
 
     def add_null(
-        self, duration: float or str, duration_in_current_format: bool = True
+            self, duration: float or str, duration_in_current_format: bool = True
     ) -> AVLayer:
         """Creates a new Null layer"""
         if duration_in_current_format:
@@ -1581,18 +1827,18 @@ class LayerCollection(PydobeBaseCollection):
         return ShapeLayer(**kwargs) if kwargs else None
 
     def add_solid(
-        self,
-        colour: list or str,
-        name: str,
-        width: int,
-        height: int,
-        pixel_aspect: float,
+            self,
+            color: list or str,
+            name: str,
+            width: int,
+            height: int,
+            pixel_aspect: float,
     ) -> LightLayer:
         """Creates a new Solid layer"""
-        if type(colour) == str:
-            colour = hex_to_rgb(colour)
+        if type(color) == str:
+            color = hex_to_rgb(color)
         kwargs = self._eval_on_object(
-            f'addSolid({colour}, "{name}", {width}, {height}, {pixel_aspect})'
+            f'addSolid({color}, "{name}", {width}, {height}, {pixel_aspect})'
         )
         return LightLayer(**kwargs) if kwargs else None
 
@@ -1605,23 +1851,13 @@ class LayerCollection(PydobeBaseCollection):
         """Returns the first (topmost) layer found in this collection with the specified name,
         or null if no layer with the given name is found."""
         kwargs = self._eval_on_object(f'byName("{name}")')
-        layer = None
         object_type = kwargs["object_type"]
-        if object_type == "AVLayer":
-            layer = AVLayer(**kwargs)
-        elif object_type == "CameraLayer":
-            layer = CameraLayer(**kwargs)
-        elif object_type == "LightLayer":
-            layer = LightLayer(**kwargs)
-        elif object_type == "ShapeLayer":
-            layer = ShapeLayer(**kwargs)
-        elif object_type == "TextLayer":
-            layer = TextLayer(**kwargs)
+        layer = create_python_object(object_type)(**kwargs)
         return layer
 
     def precompose(
-        self, indices: list, name: str, move_attributes: bool = True
-    ) -> CompositionItem:
+            self, indices: list, name: str, move_attributes: bool = True
+    ) -> CompItem:
         """Creates a new CompItem object and moves the specified layers into its layer collection"""
         if len(indices) != 1 and not move_attributes:
             # coco - technically this is an "AfterEffectsError" not a "ValueError" - discuss in review
@@ -1636,7 +1872,7 @@ class LayerCollection(PydobeBaseCollection):
             )
         else:
             kwargs = self._eval_on_object(f'precompose({indices}, "{name}")')
-        return CompositionItem(**kwargs) if kwargs else None
+        return CompItem(**kwargs) if kwargs else None
 
 
 # MISC
@@ -1709,3 +1945,4 @@ class Viewer(PydobeBaseObject):
     def set_active(self) -> bool:
         """Moves the viewer panel to the front and places focus on it, making it active."""
         return self._eval_on_object("setActive()")
+
