@@ -277,7 +277,7 @@ class Project(PydobeBaseObject):
     @time_display_type.setter
     def time_display_type(self, value: int or str):
         if type(value) == str:
-            value = time_display_dictionary[value.title()]
+            value = time_display_dictionary[value]
         self._eval_on_object(f"timeDisplayType = {value}")
 
     """The active tool in the tools panel"""
@@ -290,8 +290,7 @@ class Project(PydobeBaseObject):
     @tool_type.setter
     def tool_type(self, value: int or str):
         if type(value) == str:
-            pass
-            # value = use_feet_and_frames_dictionary[value]
+            value = tool_dictionary[value]
         self._eval_on_object(f"toolType = {value}")
 
     """When true, thumbnail views use the transparency checkerboard pattern."""
@@ -544,11 +543,11 @@ class Item(PydobeBaseObject):
                 raise ValueError("Cannot set label, value must be between 0 and 16")
             int_value = value
         else:
-            if not label_dictionary.get(value.title()):
+            if not label_dictionary.get(value):
                 raise ValueError(
                     "Cannot set label, value is not an available label color"
                 )
-            int_value = label_dictionary[value.title()]
+            int_value = label_dictionary[value]
         self._eval_on_object(f"label = {int_value};")
 
     """The name of the item as displayed in the Project panel"""
@@ -1400,7 +1399,7 @@ class FootageSource(PydobeBaseObject):
     @field_separation_type.setter
     def field_separation_type(self, value: int or str):
         if type(value) == str:
-            value = field_separation_dictionary[value.title()]
+            value = field_separation_dictionary[value]
         self._eval_on_object(f"fieldSeparationType = {value}")
 
     """When true, the footage has an alpha component."""
@@ -1474,7 +1473,7 @@ class FootageSource(PydobeBaseObject):
     @remove_pulldown.setter
     def remove_pulldown(self, value: int or str):
         if type(value) == str:
-            value = pulldown_dictionary[value.upper()]
+            value = pulldown_dictionary[value]
         self._eval_on_object(f"removePulldown = {value}")
 
     # FUNCTIONS
