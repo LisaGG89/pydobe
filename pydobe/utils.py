@@ -9,7 +9,7 @@ class IntStringDict(UserDict):
             pass
         try:
             for k, v in self.data.items():
-                if v == key:
+                if v.lower() == key.lower():
                     return k
         except KeyError:
             pass
