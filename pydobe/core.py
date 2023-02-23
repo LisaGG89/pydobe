@@ -15,7 +15,7 @@ class PydobeBaseObject(object):
         self.object_type = object_type
 
     def _eval_on_object(
-        self, extend_property: str = "", pydobe_id: str = None, index: int = None
+            self, extend_property: str = "", pydobe_id: str = None, index: int = None
     ):
         """Query property or execute function on ExtendScript object"""
         if extend_property:
@@ -106,8 +106,8 @@ def eval_script(code: str):
         PANEL_URL,
         json={
             "to_eval": "try{\n"
-            + code
-            + "\n}catch(e){e.error=true;ExtendJSON.stringify(e)}"
+                       + code
+                       + "\n}catch(e){e.error=true;ExtendJSON.stringify(e)}"
         },
     )
 
@@ -125,9 +125,11 @@ def eval_script(code: str):
 def format_to_extend(obj):
     """Format the argument to ExtendScript"""
     if isinstance(obj, PydobeBaseObject):
-        return f"$._pydobe['{obj.pydobe_id}']"
+        return f'$._pydobe["{obj.pydobe_id}"]'
     elif isinstance(obj, bool):
         return str(obj).lower()
+    elif isinstance(obj, list):
+        return f"[{', '.join([format_to_extend(item) for item in obj])}]"
 
 
 def convert_to_list(line):
@@ -139,3 +141,19 @@ def convert_to_list(line):
         value = eval_script_returning_object(value_line)
         data_list.append(value)
     return data_list
+
+
+def create_python_object(object_type):
+    subclasses = get_all_subclasses(PydobeBaseObject)
+    for subclass in subclasses:
+        if subclass.__name__ == object_type:
+            return subclass
+
+
+def get_all_subclasses(cls):
+    all_subclasses = []
+    for subclass in cls.__subclasses__():
+        all_subclasses.append(subclass)
+        all_subclasses.extend(get_all_subclasses(subclass))
+    return all_subclasses
+
