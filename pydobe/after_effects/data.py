@@ -45,3 +45,23 @@ pulldown_dictionary = IntStringDict(
         5822: "WWWWS",
     }
 )
+
+time_display_dictionary = IntStringDict(
+    {2013: "Frames", 2012: "Timecode"}
+)
+
+use_feet_and_frames_dictionary = IntStringDict(
+    {2413: "35mm", 2412: "16mm"}
+)
+
+frames_count_dictionary = IntStringDict(
+    {2612: "Start at 0", 2613: "Start at 1", 2614: "Timecode Conversion"}
+)
+
+footage_start_time_dictionary = IntStringDict(
+    {2212: "Use Media Source", 2213: "00:00:00:000"}
+)
+
+gpu_accel_type_dictionary = IntStringDict(
+    {1813: "CUDA", 1814: "Metal", 1815: "OPENCL", 1816: "SOFTWARE"}
+)
