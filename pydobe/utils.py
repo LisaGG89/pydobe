@@ -24,5 +24,5 @@ class IntStringDict(UserDict):
 
 def hex_to_rgb(hex_value):
     hex_value = hex_value.lstrip("#")
-    colour_value_list = list(int(hex_value[i : i + 2], 16) for i in (0, 2, 4))
-    return colour_value_list
+    color_value_list = list(int(hex_value[i : i + 2], 16) for i in (0, 2, 4))
+    return color_value_list
