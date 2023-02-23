@@ -12,10 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Following functionality added:
   - Add Layers to a Composition
   - Remove Layers from a Composition
-  - Set Composition Settings 
+  - Set Composition settings 
+  - Set Project settings
 
 - Following data retrievable
   - Get Composition settings 
+  - Get Project settings
   - Identify Layers in a Composition
   
 ## [0.3.0] - 2023-02-13
