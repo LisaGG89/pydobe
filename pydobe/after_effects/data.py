@@ -65,3 +65,42 @@ footage_start_time_dictionary = IntStringDict(
 gpu_accel_type_dictionary = IntStringDict(
     {1813: "CUDA", 1814: "Metal", 1815: "OPENCL", 1816: "SOFTWARE"}
 )
+
+tool_dictionary = IntStringDict(
+    {9012: "Selection Tool",
+     9013: "Rotation Tool",
+     9015: "Orbit Around Camera POI Tool",
+     9016: "Pan Camera POI Tool",
+     9017: "Dolly to Camera POI Tool",
+     9018: "Brush Tool",
+     9019: "Clone Stamp Tool",
+     9020: "Eraser Tool",
+     9021: "Hand Tool",
+     9022: "Zoom Tool",
+     9023: "Pan Behind Tool",
+     9024: "Rectangle Tool",
+     9025: "Rounded Rectangle Tool",
+     9026: "Ellipse Tool",
+     9027: "Polygon Tool",
+     9028: "Star Tool",
+     9029: "Horizontal Type Tool",
+     9030: "Vertical Type Tool",
+     9031: "Pen Tool",
+     9032: "Mask Feather Tool",
+     9033: "Add Vertex Tool",
+     9034: "Delete Vertex Tool",
+     9035: "Convert Vertex Tool",
+     9036: "Puppet Position Pin Tool",
+     9037: "Puppet Starch Pin Tool",
+     9038: "Puppet Bend Pin Tool",
+     9040: "Puppet Overlap Pin Tool",
+     9041: "Roto Brush Tool",
+     9042: "Refine Edge Tool",
+     9043: "Puppet Advanced Pin Tool",
+     9044: "Oribit Around Cursor Tool",
+     9045: "Oribit Around Scene Tool",
+     9046: "Pan Under Cursor Tool",
+     9047: "Dolly Towards Cursor Tool",
+     9048: "Dolly To Cursor Tool"
+    }
+)
