@@ -1,5 +1,46 @@
 from pydobe.utils import IntStringDict
 
+blending_modes_dictionary = IntStringDict({
+    5220: 'Add',
+    5244: 'Alpha Add',
+    5219: 'CLassic Color Burn',
+    5225: 'Classic Color Dodge',
+    5234: 'Classic Difference',
+    5238: 'Color',
+    5218: 'Color Burn',
+    5224: 'Color Dodge',
+    5214: 'Dancing Dissolve',
+    5215: 'Darken',
+    5247: 'Darker Color',
+    5233: 'Difference',
+    5213: 'Dissolve',
+    5249: 'Divide',
+    5235: 'Exclusion',
+    5228: 'Hard Light',
+    5232: 'Hard Mix',
+    5236: 'Hue',
+    5221: 'Lighten',
+    5246: 'Ligher Color',
+    5217: 'Linear Burn',
+    5223: 'Linear Dodge',
+    5229: 'Linear Light',
+    5245: 'Luminescent Premul',
+    5239: 'Luminosity',
+    5216: 'Mulitply',
+    5212: 'Normal',
+    5226: 'Overlay',
+    5231: 'Pin Light',
+    5237: 'Saturation',
+    5222: 'Screen',
+    5248: 'Subtract',
+    5242: 'Silhouette Alpha',
+    5243: 'Silhouette Luma',
+    5227: 'Soft Light',
+    5240: 'Stencil Alpha',
+    5241: 'Stencil Luma',
+    5230: 'Vivid Light'
+})
+
 label_dictionary = IntStringDict(
     {
         0: "None",
@@ -48,7 +89,7 @@ pulldown_dictionary = IntStringDict(
 
 time_display_dictionary = IntStringDict({2013: "Frames", 2012: "Timecode"})
 
-use_feet_and_frames_dictionary = IntStringDict({2413: "35mm", 2412: "16mm"})
+feet_and_frames_dictionary = IntStringDict({2413: "35mm", 2412: "16mm"})
 
 frames_count_dictionary = IntStringDict(
     {2612: "Start at 0", 2613: "Start at 1", 2614: "Timecode Conversion"}
@@ -60,6 +101,10 @@ footage_start_time_dictionary = IntStringDict(
 
 gpu_accel_type_dictionary = IntStringDict(
     {1813: "CUDA", 1814: "Metal", 1815: "OPENCL", 1816: "SOFTWARE"}
+)
+
+frame_blending_dictionary = IntStringDict(
+    {4012: "Off", 4013: "Frame Mix", 4014: "Pixel Motion"}
 )
 
 tool_dictionary = IntStringDict(
