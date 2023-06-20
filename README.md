@@ -18,6 +18,14 @@ Windows:
 pip install pydobe
 ``
 
+## After Effects
+
+Copy the directory `pydobe_panel` from `pydobe/integrations/after_effects` to your CEP directory:
+- User (no elevated permission needed): `%userprofile%\AppData\Roaming\Adobe\CEP\extensions`
+- System: `C:\Program Files\Common Files\Adobe\CEP\extensions`
+
+Enable "**Allow Scripts to Write Files and Access Network**" in your "_Scripting & Expressions_" preferences.
+
 # Use cases and examples
 
 Snippets and examples for potential uses within After Effects
@@ -220,6 +228,7 @@ Thank you to Corentin Charron for constant mentoring.
 # License
 
 This project is licensed under the MIT License. See the LICENSE file for details. Copy it, steal it, modify it, share it!
+
 # Contact
 
 For support, questions, or interest, please contact me at lisa.gg89@gmail.com
